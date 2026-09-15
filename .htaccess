@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Clean admin URLs
+RewriteRule ^admin/?$ index.php?page=admin-login [L,QSA]
+RewriteRule ^admin/dashboard/?$ index.php?page=admin-dashboard [L,QSA]

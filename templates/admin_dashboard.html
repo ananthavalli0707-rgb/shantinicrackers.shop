@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 admin-section-title">
+    <div>
+        <p class="section-kicker mb-1">Operations center</p>
+        <h1 class="fw-bold mb-1">Admin Dashboard</h1>
+        <p class="text-muted mb-0">Monitor your catalog and customer estimates.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('admin_category_products') }}" class="btn btn-outline-danger fw-bold">Category-wise Products</a>
+        <a href="{{ url_for('admin_add_product') }}" class="btn btn-danger fw-bold">+ Add Product</a>
+    </div>
+</div>
+
+<div class="row g-3 g-xl-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-body p-3 p-md-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="text-muted small fw-bold text-uppercase">Total products</span>
+                    <span class="badge rounded-pill text-bg-danger">Catalog</span>
+                </div>
+                <div class="display-6 fw-bold mt-3">{{ stats.product_count }}</div>
+                <div class="text-muted small">{{ stats.in_stock_count }} currently available</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-body p-3 p-md-4">
+                <span class="text-muted small fw-bold text-uppercase">Customers</span>
+                <div class="display-6 fw-bold mt-3">{{ stats.customer_count }}</div>
+                <div class="text-muted small">Registered accounts</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-body p-3 p-md-4">
+                <span class="text-muted small fw-bold text-uppercase">Inquiries</span>
+                <div class="display-6 fw-bold mt-3">{{ stats.inquiry_count }}</div>
+                <div class="text-muted small">Estimate submissions</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-3 h-100 bg-dark text-white">
+            <div class="card-body p-3 p-md-4">
+                <span class="text-white-50 small fw-bold text-uppercase">Quick action</span>
+                <h5 class="fw-bold mt-3">Keep the catalog fresh</h5>
+                <a href="{{ url_for('admin_add_product') }}" class="btn btn-warning btn-sm fw-bold mt-2">Upload an image</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3 admin-panel mb-4">
+    <div class="card-body px-4 py-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h4 class="fw-bold mb-1">Customer inquiries</h4>
+            <p class="text-muted small mb-0">Review cracker requests and update delivery status.</p>
+        </div>
+        <a href="{{ url_for('admin_inquiries') }}" class="btn btn-outline-danger fw-bold">Open inquiries ({{ stats.inquiry_count }})</a>
+    </div>
+</div>
+<div class="card border-0 shadow-sm rounded-3 mt-4 admin-panel">
+    <div class="card-header theme-surface border-0 pt-4 px-4">
+        <h4 class="fw-bold mb-1">Product catalog</h4>
+        <p class="text-muted small mb-0">Update pricing, availability, and product details.</p>
+    </div>
+    <div class="card-body px-4">
+        {% if products %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr class="text-muted small text-uppercase"><th>Product</th><th>Category</th><th>Price</th><th>Availability</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="fw-bold">{{ product.name }}<div class="text-muted small">{{ product.brand_name or 'No brand' }}</div></td>
+                        <td>{{ product.category_name or 'Uncategorized' }}</td>
+                        <td><span class="text-decoration-line-through text-muted">₹{{ product.actual_price }}</span> <span class="fw-bold text-success">₹{{ product.discount_price }}</span></td>
+                        <td><span class="badge text-bg-{{ 'success' if product.is_stock else 'secondary' }}">{{ 'In stock' if product.is_stock else 'Unavailable' }}</span></td>
+                        <td class="text-end admin-actions"><div class="d-flex flex-wrap justify-content-end gap-2"><a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn-sm btn-outline-dark">Edit</a> <form action="{{ url_for('admin_delete_product', product_id=product.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this product from the catalog?');"><button type="submit" class="btn btn-sm btn-outline-danger">Remove</button></form></div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}<p class="text-muted mb-0">No products in the catalog.</p>{% endif %}
+    </div>
+</div>
+{% endblock %}

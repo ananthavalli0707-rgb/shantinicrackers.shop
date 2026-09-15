@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow border-0 rounded-3 p-3 p-sm-4 p-lg-5 theme-surface">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                <h3 class="h4 fw-bold theme-text mb-0">🛡️ Add New Cracker</h3>
+                <span class="badge rounded-pill text-bg-danger">Admin</span>
+            </div>
+            <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Product Name</label>
+                    <input type="text" name="name" class="form-control form-control-lg" required>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6 mb-3">
+                        <label class="form-label fw-bold">Category</label>
+                        <select name="category_id" class="form-select" required>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" data-discount-percent="{{ 0 if cat.name|lower == 'gift box' else cat.discount_percent }}" {{ 'selected' if cat.id == selected_category_id else '' }}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 mb-3">
+                        <label class="form-label fw-bold">Brand</label>
+                        <select name="brand_id" class="form-select" required>
+                            {% for brand in brands %}
+                            <option value="{{ brand.id }}">{{ brand.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6 mb-3">
+                        <label class="form-label fw-bold">Actual Price (MRP)</label>
+                        <input type="number" step="0.01" name="actual_price" class="form-control" required>
+                    </div>
+                    <div class="col-12 col-sm-6 mb-3">
+                        <label class="form-label fw-bold">Our Discount Price</label>
+                        <input id="discount-price" type="number" step="0.01" name="discount_price" class="form-control" readonly required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Product Catalog Image</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                    <div class="form-text text-muted">Supports PNG, JPG, JPEG up to 5MB.</div>
+                </div>
+                <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold">🚀 Upload and Publish Item</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const categoryInput = document.querySelector('select[name="category_id"]');
+    const actualPriceInput = document.querySelector('input[name="actual_price"]');
+    const discountPriceInput = document.getElementById('discount-price');
+
+    function updateDiscountPrice() {
+        const actualPrice = Number(actualPriceInput.value);
+        const selectedCategory = categoryInput.options[categoryInput.selectedIndex];
+        const discountPercent = Number(selectedCategory.dataset.discountPercent || 0);
+
+        if (!Number.isFinite(actualPrice) || actualPrice < 0) {
+            discountPriceInput.value = '';
+            return;
+        }
+
+        discountPriceInput.value = Math.round(actualPrice * (1 - discountPercent / 100));
+    }
+
+    categoryInput.addEventListener('change', updateDiscountPrice);
+    actualPriceInput.addEventListener('input', updateDiscountPrice);
+</script>
+{% endblock %}
