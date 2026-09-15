@@ -41,14 +41,15 @@ function verify_csrf(): void {
 }
 
 function asset($path) {
+    $baseDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     $path = ltrim($path, '/');
     while (str_starts_with($path, 'uploads/uploads/')) {
         $path = substr($path, 8);
     }
     if (str_starts_with($path, 'uploads/')) {
-        return 'templates/static/' . $path;
+        return $baseDir . '/templates/static/' . $path;
     }
-    return 'assets/' . $path;
+    return $baseDir . '/assets/' . $path;
 }
 
 function url($page, $params = []) {
