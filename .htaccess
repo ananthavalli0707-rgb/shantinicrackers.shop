@@ -1,5 +1,8 @@
 RewriteEngine On
 
-# Clean admin URLs
-RewriteRule ^admin/?$ index.php?page=admin-login [L,QSA]
-RewriteRule ^admin/dashboard/?$ index.php?page=admin-dashboard [L,QSA]
+# Skip existing files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite everything else to index.php?page=...
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ index.php?page=$1 [L,QSA]

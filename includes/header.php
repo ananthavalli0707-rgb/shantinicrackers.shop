@@ -53,7 +53,11 @@ function asset($path) {
 
 function url($page, $params = []) {
     $query = http_build_query($params);
-    return 'index.php?page=' . urlencode($page) . ($query ? '&' . $query : '');
+    $baseDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    if ($page === 'home' && empty($params)) {
+        return $baseDir . '/';
+    }
+    return $baseDir . '/' . urlencode($page) . ($query ? '?' . $query : '');
 }
 
 $currentPage = $_GET['page'] ?? 'home';
