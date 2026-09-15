@@ -149,7 +149,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             <a href="https://www.facebook.com/share/1AGTaToTGZ/" target="_blank" rel="noopener" class="page-social-link page-facebook" aria-label="Follow us on Facebook" title="Follow us on Facebook">
                 <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
             </a>
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="page-social-link page-instagram" aria-label="Follow us on Instagram" title="Follow us on Instagram">
+            <a href="https://www.instagram.com/shantinicrackersivakasi/" target="_blank" rel="noopener" class="page-social-link page-instagram" aria-label="Follow us on Instagram" title="Follow us on Instagram">
                 <i class="fa-brands fa-instagram" aria-hidden="true"></i>
             </a>
             <a href="https://wa.me/917708971956?text=Hello%20Shantini%20Crackers%2C%20I%20need%20help%20with%20my%20fireworks%20order." target="_blank" rel="noopener" class="page-social-link page-whatsapp" aria-label="Chat with us on WhatsApp" title="Chat with us on WhatsApp">
