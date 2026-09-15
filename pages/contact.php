@@ -42,7 +42,7 @@
                     </div>
                     <h3 class="h3-card mb-3">Email Us</h3>
                     <p class="mb-0" style="word-break: break-all;">
-                        <a href="mailto:shantinicrackerssivakasi@gmail.com" class="text-decoration-none fw-bold text-accent">Email Support</a>
+                        <a href="mailto:shantinicrackerssivakasi@gmail.com" class="text-decoration-none fw-bold text-accent">shantinicrackerssivakasi@gmail.com</a>
                     </p>
                 </div>
             </div>
