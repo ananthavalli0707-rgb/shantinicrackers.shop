@@ -23,6 +23,15 @@
     --radius-lg: 20px;
     
     --transition: all 0.3s ease;
+
+    /* Map to Bootstrap variables to fix text visibility in standard components */
+    --bs-body-color: var(--text-main);
+    --bs-body-bg: var(--bg-color);
+    --bs-heading-color: var(--text-main);
+    --bs-card-bg: var(--bg-surface);
+    --bs-card-color: var(--text-main);
+    --bs-table-color: var(--text-main);
+    --bs-table-bg: var(--bg-surface);
 }
 
 [data-theme="dark"] {
@@ -40,6 +49,15 @@
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+
+    /* Map to Bootstrap variables in dark mode */
+    --bs-body-color: var(--text-main);
+    --bs-body-bg: var(--bg-color);
+    --bs-heading-color: var(--text-main);
+    --bs-card-bg: var(--bg-surface);
+    --bs-card-color: var(--text-main);
+    --bs-table-color: var(--text-main);
+    --bs-table-bg: var(--bg-surface);
 }
 
 body {
@@ -138,6 +156,15 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 1000;
+}
+
+/* Fix mobile menu icon visibility in light mode */
+.site-nav .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+[data-theme="dark"] .site-nav .navbar-toggler-icon {
+    filter: none;
 }
 
 .site-nav .navbar-brand {
