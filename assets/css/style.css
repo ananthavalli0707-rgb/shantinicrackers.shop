@@ -226,17 +226,15 @@ a:hover {
     object-fit: contain;
 }
 
-.offer-badge {
+.offer-logo-img {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--primary);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 4px;
+    top: -5px;
+    right: -5px;
+    width: 50px;
+    height: auto;
     z-index: 2;
+    transform: rotate(15deg);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .card-body-content {

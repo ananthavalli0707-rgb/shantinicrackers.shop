@@ -12,7 +12,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     redirect('admin-dashboard');
 }
 
-$products = $pdo->query('SELECT products.*, categories.name AS category_name FROM products LEFT JOIN categories ON categories.id = products.category_id ORDER BY products.id DESC')->fetchAll();
+$limit = 10;
+$p = max(1, (int)($_GET['p'] ?? 1));
+$offset = ($p - 1) * $limit;
+
+$totalProducts = (int)$pdo->query('SELECT COUNT(*) FROM products')->fetchColumn();
+$totalPages = max(1, ceil($totalProducts / $limit));
+
+$stmt = $pdo->prepare('SELECT products.*, categories.name AS category_name FROM products LEFT JOIN categories ON categories.id = products.category_id ORDER BY products.id DESC LIMIT :limit OFFSET :offset');
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$products = $stmt->fetchAll();
+
 $inquiryCount = (int)$pdo->query('SELECT COUNT(*) FROM inquiries')->fetchColumn();
 ?>
 
@@ -20,7 +32,7 @@ $inquiryCount = (int)$pdo->query('SELECT COUNT(*) FROM inquiries')->fetchColumn(
     <h2 class="fw-bold mb-4">Admin Dashboard</h2>
     <div class="d-flex gap-2 mb-4">
         <a href="<?= url('admin-add-product') ?>" class="btn btn-danger">Add Product</a>
-        <a href="<?= url('admin-inquiries') ?>" class="btn btn-outline-dark">Inquiries (<?= $inquiryCount ?>)</a>
+        <a href="<?= url('admin-inquiries') ?>" class="btn btn-outline-dark">Enquiries (<?= $inquiryCount ?>)</a>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle admin-table">
@@ -41,6 +53,27 @@ $inquiryCount = (int)$pdo->query('SELECT COUNT(*) FROM inquiries')->fetchColumn(
             </tbody>
         </table>
     </div>
+    
+    <?php if ($totalPages > 1): ?>
+        <nav aria-label="Product pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <?= $p <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= url('admin-dashboard', ['p' => $p - 1]) ?>" tabindex="-1">Previous</a>
+                </li>
+                
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?= $i === $p ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= url('admin-dashboard', ['p' => $i]) ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+                
+                <li class="page-item <?= $p >= $totalPages ? 'disabled' : '' ?>">
+                    <a class="page-link" href="<?= url('admin-dashboard', ['p' => $p + 1]) ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+    <?php endif; ?>
+
     <?php if (!$products): ?><div class="alert alert-info">No products found.</div><?php endif; ?>
     <div class="row g-4 d-none">
         <div class="col-md-4">

@@ -27,7 +27,7 @@ foreach ($inquiries as $row) {
 ?>
 
 <section>
-    <h2 class="fw-bold mb-4">Customer Inquiries</h2>
+    <h2 class="fw-bold mb-4">Customer Enquiries</h2>
     <div class="table-responsive">
         <table class="table table-bordered align-middle admin-table">
             <thead>

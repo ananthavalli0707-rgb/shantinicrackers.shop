@@ -51,25 +51,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'clear') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
     verify_csrf();
-    if (empty($_SESSION['logged_in'])) {
-        redirect('login');
-    }
-
-    $shippingName = trim($_POST['shipping_name'] ?? $_SESSION['user_name'] ?? 'Customer');
+    $shippingName = trim($_POST['shipping_name'] ?? $_SESSION['user_name'] ?? '');
     $address1 = trim($_POST['shipping_address_1'] ?? '');
-    $address2 = trim($_POST['shipping_address_2'] ?? '');
+    $state = trim($_POST['shipping_state'] ?? '');
     $city = trim($_POST['shipping_city'] ?? '');
     $pincode = trim($_POST['shipping_pincode'] ?? '');
-    $district = trim($_POST['shipping_district'] ?? '');
-    $state = trim($_POST['shipping_state'] ?? '');
-    $landmark = trim($_POST['shipping_landmark'] ?? '');
-    $phone = preg_replace('/\D+/', '', $_POST['customer_phone'] ?? ($_SESSION['user_phone'] ?? ''));
-    $alternatePhone = preg_replace('/\D+/', '', $_POST['alternate_contact_number'] ?? '');
     $whatsappPhone = preg_replace('/\D+/', '', $_POST['whatsapp_number'] ?? '');
     $email = trim($_POST['customer_email'] ?? '');
 
-    if ($address1 === '' || $city === '' || $pincode === '' || $district === '' || $state === '' || $phone === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $submitError = 'Please complete the shipping details and enter a valid email address for confirmation.';
+    if ($shippingName === '' || $address1 === '' || $city === '' || $pincode === '' || $state === '' || $whatsappPhone === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $submitError = 'Please complete all shipping details and enter a valid email address.';
     } else {
         $dbItems = [];
         foreach ($_SESSION['cart'] as $productId => $quantity) {
@@ -93,22 +84,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
         $packagingTotal = round($discountedTotal * 0.03, 2);
         $amount = round($discountedTotal + $packagingTotal, 2);
 
-        if ($amount < 3000) {
-            $submitError = 'Minimum estimate amount is ₹3000. Please add more items.';
+        $minAmount = ($state === 'Tamil Nadu') ? 3000 : 5000;
+        if ($amount < $minAmount) {
+            $submitError = "Minimum estimate amount for {$state} is ₹{$minAmount}. Please add more items.";
         } elseif (!$dbItems) {
             $submitError = 'Your estimate sheet is empty.';
         } else {
             try {
                 $pdo->beginTransaction();
+                $userId = !empty($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                 $stmt = $pdo->prepare('INSERT INTO inquiries (user_id, total_amount) VALUES (:user_id, :total_amount)');
-                $stmt->execute(['user_id' => $_SESSION['user_id'], 'total_amount' => $amount]);
+                $stmt->execute(['user_id' => $userId, 'total_amount' => $amount]);
                 $inquiryId = $pdo->lastInsertId();
                 $stmt = $pdo->prepare('INSERT INTO shipping_details (inquiry_id, shipping_name, shipping_address_1, shipping_address_2, city, pincode, district, state, landmark, contact_number, alternate_contact_number, whatsapp_number, customer_email) VALUES (:inquiry_id, :shipping_name, :address1, :address2, :city, :pincode, :district, :state, :landmark, :phone, :alternate_phone, :whatsapp_phone, :email)');
                 $stmt->execute([
                     'inquiry_id' => $inquiryId, 'shipping_name' => $shippingName, 'address1' => $address1,
-                    'address2' => $address2, 'city' => $city, 'pincode' => $pincode, 'district' => $district,
-                    'state' => $state, 'landmark' => $landmark, 'phone' => $phone,
-                    'alternate_phone' => $alternatePhone, 'whatsapp_phone' => $whatsappPhone, 'email' => $email,
+                    'address2' => '', 'city' => $city, 'pincode' => $pincode, 'district' => '',
+                    'state' => $state, 'landmark' => '', 'phone' => $whatsappPhone,
+                    'alternate_phone' => '', 'whatsapp_phone' => $whatsappPhone, 'email' => $email,
                 ]);
                 $stmt = $pdo->prepare('INSERT INTO inquiry_items (inquiry_id, product_id, quantity, price_at_booking) VALUES (:inquiry_id, :product_id, :quantity, :price)');
                 foreach ($dbItems as $item) {
@@ -117,13 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 $pdo->commit();
 
                 $message = "Shantini Crackers Estimate Request #{$inquiryId}\n\nName: {$shippingName}\nAddress: {$address1}";
-                if ($address2 !== '') {
-                    $message .= ", {$address2}";
-                }
-                $message .= "\nCity: {$city}\nDistrict: {$district}\nState: {$state}\nPincode: {$pincode}\nPhone: {$phone}";
-                if ($whatsappPhone !== '') {
-                    $message .= "\nCustomer WhatsApp: {$whatsappPhone}";
-                }
+                $message .= "\nCity: {$city}\nState: {$state}\nPincode: {$pincode}";
+                $message .= "\nCustomer WhatsApp: {$whatsappPhone}";
                 $message .= "\nEmail: {$email}\n\nProducts:\n";
                 foreach ($dbItems as $item) {
                     $message .= "- {$item['name']} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
@@ -181,9 +169,14 @@ $amount = round($discountedTotal + $packagingTotal, 2);
         </div>
 
         <?php if ($submitSuccess !== ''): ?>
-            <div class="alert alert-success shadow-sm mb-4">
-                <?= htmlspecialchars($submitSuccess) ?>
-                <?php if (!empty($_SESSION['is_admin'])): ?><br><a href="<?= url('admin-inquiries') ?>" class="alert-link">Open Customer Inquiries</a><?php endif; ?>
+            <div class="card shadow-sm mb-4 mx-auto border-success" style="max-width: 600px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 fw-bold">🎆 Shantini Crackers - Order Confirmed</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 fs-5"><?= htmlspecialchars($submitSuccess) ?></p>
+                    <?php if (!empty($_SESSION['is_admin'])): ?><p class="mt-3 mb-0"><a href="<?= url('admin-inquiries') ?>" class="btn btn-sm btn-outline-success">Open Customer Inquiries</a></p><?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
         
@@ -292,35 +285,98 @@ $amount = round($discountedTotal + $packagingTotal, 2);
                             <p class="text-muted small mb-4">This is an estimated amount. Final billing amount will be confirmed by admin.</p>
                         </div>
                         
-                        <?php if (empty($_SESSION['logged_in'])): ?>
-                            <a href="<?= url('login') ?>" class="btn-primary w-100 text-center d-block py-3">Login to Request Quote</a>
-                        <?php else: ?>
-                            <form method="POST" class="mt-4">
-                                <?= csrf_field() ?>
-                                <input type="hidden" name="action" value="submit">
-                                <h4 class="h3-card mb-3 fs-5">Shipping Details</h4>
-                                <input class="form-control mb-3 py-2" name="shipping_name" placeholder="Full Name" value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>" required>
-                                <input class="form-control mb-3 py-2" name="shipping_address_1" placeholder="Address Line 1" required>
-                                <input class="form-control mb-3 py-2" name="shipping_city" placeholder="City" required>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-6"><input class="form-control py-2" name="shipping_district" placeholder="District" required></div>
-                                    <div class="col-6"><input class="form-control py-2" name="shipping_state" placeholder="State" required></div>
-                                </div>
-                                <input class="form-control mb-3 py-2" name="shipping_pincode" placeholder="Pincode" required>
-                                <input class="form-control mb-3 py-2" name="customer_phone" placeholder="Contact number" value="<?= htmlspecialchars($_SESSION['user_phone'] ?? '') ?>" required>
-                                <input class="form-control mb-3 py-2" type="email" name="customer_email" placeholder="Email for confirmation" value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>" required>
-                                <input class="form-control mb-4 py-2" type="tel" name="whatsapp_number" placeholder="WhatsApp number (optional)" inputmode="numeric">
-                                
-                                <button type="submit" class="w-100 py-3" style="background: #25D366; color: white; border: none; border-radius: var(--radius-sm); font-weight: bold; font-size: 1.1rem; transition: transform 0.2s;">
-                                    <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Send via WhatsApp
-                                </button>
-                            </form>
-                        <?php endif; ?>
+                        <form method="POST" class="mt-4" id="checkoutForm">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="action" value="submit">
+                            <h4 class="h3-card mb-3 fs-5">Shipping Details</h4>
+                            <input class="form-control mb-3 py-2" name="shipping_name" placeholder="Full Name" value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>" required>
+                            <input class="form-control mb-3 py-2" type="email" name="customer_email" placeholder="Verified Email" value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>" required>
+                            <input class="form-control mb-3 py-2" type="tel" name="whatsapp_number" placeholder="WhatsApp number" required>
+                            <input class="form-control mb-3 py-2" name="shipping_address_1" placeholder="Detailed Address" required>
+                            <input class="form-control mb-3 py-2" name="shipping_pincode" placeholder="Pincode" required>
+                            
+                            <select class="form-select mb-3 py-2" name="shipping_state" id="stateSelect" required>
+                                <option value="">Select State</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Kerala">Kerala</option>
+                            </select>
+                            
+                            <select class="form-select mb-4 py-2" name="shipping_city" id="citySelect" required disabled>
+                                <option value="">Select City</option>
+                            </select>
+                            
+                            <div id="limitWarning" class="alert alert-warning d-none mb-3 small fw-bold shadow-sm"></div>
+
+                            <button type="submit" id="submitBtn" class="w-100 py-3 mt-2 shadow-sm" style="background: #25D366; color: white; border: none; border-radius: var(--radius-sm); font-weight: bold; font-size: 1.1rem; transition: transform 0.2s;">
+                                <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Send via WhatsApp
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+    const cityData = {
+        "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Vellore", "Sivakasi", "Other"],
+        "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi", "Other"],
+        "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Other"],
+        "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Khammam", "Karimnagar", "Other"],
+        "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala", "Rohtak", "Other"],
+        "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Bikaner", "Ajmer", "Other"],
+        "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Other"],
+        "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Other"]
+    };
+
+    const cartTotal = <?= $amount ?>;
+    const stateSelect = document.getElementById('stateSelect');
+    const citySelect = document.getElementById('citySelect');
+    const submitBtn = document.getElementById('submitBtn');
+    const limitWarning = document.getElementById('limitWarning');
+
+    stateSelect.addEventListener('change', function() {
+        const state = this.value;
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        
+        if (state && cityData[state]) {
+            citySelect.disabled = false;
+            cityData[state].forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+            
+            // Validate minimum amount
+            const minAmount = (state === 'Tamil Nadu') ? 3000 : 5000;
+            if (cartTotal < minAmount) {
+                limitWarning.textContent = `Minimum cart limit for ${state} is ₹${minAmount}. Please add more items.`;
+                limitWarning.classList.remove('d-none');
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.pointerEvents = 'none';
+            } else {
+                limitWarning.classList.add('d-none');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.pointerEvents = 'auto';
+            }
+        } else {
+            citySelect.disabled = true;
+            limitWarning.classList.add('d-none');
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.pointerEvents = 'auto';
+        }
+    });
+</script>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

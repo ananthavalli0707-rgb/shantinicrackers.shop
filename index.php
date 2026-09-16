@@ -81,20 +81,26 @@ switch ($page) {
         break;
     case 'admin-logout':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?page=home');
+            header('Location: index.php?page=admin-login');
             exit;
         }
         require_once __DIR__ . '/includes/header.php';
         verify_csrf();
         session_unset();
         session_destroy();
-        header('Location: index.php?page=home');
+        header('Location: index.php?page=admin-login');
         exit;
     case 'about':
         include __DIR__ . '/pages/about.php';
         break;
     case 'contact':
         include __DIR__ . '/pages/contact.php';
+        break;
+    case 'terms':
+        include __DIR__ . '/pages/terms.php';
+        break;
+    case 'privacy':
+        include __DIR__ . '/pages/privacy.php';
         break;
     default:
         include __DIR__ . '/pages/home.php';

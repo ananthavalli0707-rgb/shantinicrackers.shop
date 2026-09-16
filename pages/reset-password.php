@@ -1,4 +1,5 @@
 <?php
+$isStandalonePage = true;
 require __DIR__ . '/../includes/header.php';
 
 $token = trim($_GET['token'] ?? '');

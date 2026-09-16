@@ -98,7 +98,7 @@ try {
                         <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
                             <div class="catalog-image-wrap">
                                 <?php if (strtolower($product['category_name'] ?? '') !== 'gift box'): ?>
-                                    <span class="offer-badge">Offer</span>
+                                    <img src="<?= asset('uploads/offer%20logo.png') ?>" alt="Offer" class="offer-logo-img">
                                 <?php endif; ?>
                                 <?php if (!empty($product['image'])): ?>
                                     <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">

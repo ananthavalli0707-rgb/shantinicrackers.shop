@@ -82,7 +82,7 @@ $totalCategories = count($productGroups);
                                             <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
                                                 <div class="catalog-image-wrap">
                                                     <?php if (strtolower($product['category_name'] ?? '') !== 'gift box'): ?>
-                                                        <span class="offer-badge">Offer</span>
+                                                        <img src="<?= asset('uploads/offer%20logo.png') ?>" alt="Offer" class="offer-logo-img">
                                                     <?php endif; ?>
                                                     <?php if (!empty($product['image'])): ?>
                                                         <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
@@ -132,57 +132,91 @@ $totalCategories = count($productGroups);
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let currentCategory = 'all';
+    let currentSearchTerm = '';
+    
+    const allItems = Array.from(document.querySelectorAll('.product-item-col'));
+    const sections = Array.from(document.querySelectorAll('.product-category-section'));
+    const noRes = document.getElementById('noSearchResults');
+    
+    // Add pagination controls HTML
+    const catalogContainer = document.getElementById('productCatalogContainer');
+    const paginationHTML = `
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-5 pb-3 border-top pt-4" id="paginationControls">
+            <button id="prevPageBtn" class="btn btn-outline-primary" disabled><i class="fa-solid fa-arrow-left me-2"></i> Previous</button>
+            <span id="pageInfo" class="text-muted fw-bold">Page 1</span>
+            <button id="nextPageBtn" class="btn btn-outline-primary">Next <i class="fa-solid fa-arrow-right ms-2"></i></button>
+        </div>
+    `;
+    catalogContainer.insertAdjacentHTML('beforeend', paginationHTML);
+    
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const pageInfo = document.getElementById('pageInfo');
+    const paginationControls = document.getElementById('paginationControls');
+
+    function applyFiltersAndPaginate() {
+        // 1. Filter items based on category and search term
+        let visibleItems = allItems.filter(item => {
+            const matchesSearch = currentSearchTerm === '' || item.getAttribute('data-product-name').indexOf(currentSearchTerm) > -1;
+            const itemCategory = item.closest('.product-category-section').getAttribute('data-category-group');
+            const matchesCategory = currentCategory === 'all' || itemCategory === currentCategory;
+            return matchesSearch && matchesCategory;
+        });
+        
+        // 2. Pagination logic
+        const totalPages = Math.ceil(visibleItems.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        // 3. Apply visibility
+        allItems.forEach(item => item.style.display = 'none'); // hide all initially
+        
+        const itemsToShow = visibleItems.slice(startIndex, endIndex);
+        itemsToShow.forEach(item => item.style.display = '');
+        
+        // 4. Handle sections visibility
+        sections.forEach(section => {
+            const hasVisibleItems = Array.from(section.querySelectorAll('.product-item-col')).some(item => item.style.display !== 'none');
+            section.style.display = hasVisibleItems ? '' : 'none';
+        });
+        
+        // 5. Update UI states
+        if (visibleItems.length === 0 && currentSearchTerm.length > 0) {
+            if (noRes) noRes.classList.remove('d-none');
+            paginationControls.style.display = 'none';
+        } else {
+            if (noRes) noRes.classList.add('d-none');
+            paginationControls.style.display = visibleItems.length > itemsPerPage ? 'flex' : 'none';
+        }
+        
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    }
+
     const searchInput = document.getElementById('categorySearchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            let foundAny = false;
-            
-            document.querySelectorAll('.product-item-col').forEach(function(item) {
-                if (item.getAttribute('data-product-name').indexOf(term) > -1) {
-                    item.style.display = '';
-                    foundAny = true;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // Hide empty sections
-            document.querySelectorAll('.product-category-section').forEach(function(section) {
-                const visibleItems = section.querySelectorAll('.product-item-col[style=""]').length + 
-                                     section.querySelectorAll('.product-item-col:not([style*="display: none"])').length;
-                if (visibleItems === 0) {
-                    section.style.display = 'none';
-                } else {
-                    section.style.display = '';
-                }
-            });
-            
-            const noRes = document.getElementById('noSearchResults');
-            if(noRes) {
-                if (!foundAny && term.length > 0) noRes.classList.remove('d-none');
-                else noRes.classList.add('d-none');
-            }
+            currentSearchTerm = e.target.value.toLowerCase();
+            currentPage = 1; // Reset to first page
+            applyFiltersAndPaginate();
         });
     }
     
-    // Category filter logic
     document.querySelectorAll('.category-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
             document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             
-            const category = this.getAttribute('data-category');
-            
-            document.querySelectorAll('.product-category-section').forEach(section => {
-                if (category === 'all' || section.getAttribute('data-category-group') === category) {
-                    section.style.display = '';
-                } else {
-                    section.style.display = 'none';
-                }
-            });
+            currentCategory = this.getAttribute('data-category');
+            currentPage = 1; // Reset to first page
+            applyFiltersAndPaginate();
             
             if(window.innerWidth < 992) {
                 const sidebarEl = document.getElementById('categorySidebarCollapse');
@@ -192,6 +226,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            applyFiltersAndPaginate();
+            catalogContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        currentPage++;
+        applyFiltersAndPaginate();
+        catalogContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+
+    // Initial load
+    applyFiltersAndPaginate();
 });
 </script>
 
