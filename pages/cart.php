@@ -7,7 +7,7 @@ if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
 }
 
 $action = $_POST['action'] ?? '';
-$adminWhatsAppNumber = '917708971956';
+$adminWhatsAppNumber = '919786361678';
 $submitSuccess = $_SESSION['inquiry_success'] ?? '';
 unset($_SESSION['inquiry_success']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'add') {

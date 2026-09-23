@@ -92,7 +92,12 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shantini Crackers</title>
+    <?php 
+        $metaTitle = $pageTitle ?? 'Shantini Crackers | Buy Fireworks & Crackers Online in Sivakasi';
+        $metaDescription = $pageDescription ?? 'Premium fireworks and festive celebration products from Sivakasi. Lighting up your special moments with joy, safety, and spectacular colors.';
+    ?>
+    <title><?= htmlspecialchars($metaTitle) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">

@@ -4,6 +4,9 @@ RewriteEngine On
 RewriteRule ^admin/?$ index.php?page=admin-login [L,QSA]
 RewriteRule ^admin/dashboard/?$ index.php?page=admin-dashboard [L,QSA]
 
+# Sitemap route
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
 # Skip existing files and directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

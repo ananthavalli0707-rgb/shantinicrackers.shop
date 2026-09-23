@@ -95,6 +95,21 @@
     </footer>
     <?php endif; ?>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsentBanner" class="cookie-consent-banner">
+        <div class="container">
+            <div class="banner-content">
+                <p class="cookie-consent-text">
+                    We use cookies to analyze website traffic and optimize your website experience. By accepting our use of cookies, your data will be aggregated with all other user data. <a href="<?= url('privacy') ?>" class="text-primary text-decoration-underline">Learn more</a>
+                </p>
+                <div class="cookie-consent-actions">
+                    <button id="btnCookieDecline" class="btn-cookie-decline">Decline</button>
+                    <button id="btnCookieAccept" class="btn-cookie-accept">Accept All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <button type="button" class="back-to-top-btn" id="backToTopBtn" aria-label="Back to top">
         <i class="fa-solid fa-arrow-up"></i> Back to Top
     </button>
@@ -142,5 +157,51 @@
         })();
     </script>
     <script src="<?= asset('js/app.js') ?>"></script>
+    
+    <!-- Google Analytics Consent & Integration -->
+    <script>
+        (function() {
+            const banner = document.getElementById('cookieConsentBanner');
+            const btnAccept = document.getElementById('btnCookieAccept');
+            const btnDecline = document.getElementById('btnCookieDecline');
+            
+            const gaMeasurementId = 'G-PSL8LT8LFF';
+            
+            function loadGoogleAnalytics() {
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){window.dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', gaMeasurementId);
+            }
+
+            if (banner && btnAccept && btnDecline) {
+                const consent = localStorage.getItem('ga_consent');
+                
+                if (consent === 'accepted') {
+                    loadGoogleAnalytics();
+                } else if (!consent) {
+                    setTimeout(() => {
+                        banner.classList.add('show');
+                    }, 500);
+                }
+
+                btnAccept.addEventListener('click', function() {
+                    localStorage.setItem('ga_consent', 'accepted');
+                    banner.classList.remove('show');
+                    loadGoogleAnalytics();
+                });
+
+                btnDecline.addEventListener('click', function() {
+                    localStorage.setItem('ga_consent', 'declined');
+                    banner.classList.remove('show');
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
