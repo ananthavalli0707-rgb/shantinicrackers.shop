@@ -45,7 +45,7 @@ $totalCategories = count($productGroups);
                 <div class="collapse d-lg-block sticky-top" id="categorySidebarCollapse" style="top: 100px;">
                     <div class="category-sidebar">
                         <h4 class="h3-card mb-3 d-none d-lg-block">Categories</h4>
-                        <div class="category-list" id="sidebarCategoryList">
+                        <div class="category-list pe-2" id="sidebarCategoryList" style="max-height: calc(100vh - 160px); overflow-y: auto;">
                             <a href="#" class="category-link active" data-category="all">
                                 <span>All Products</span>
                                 <span class="badge"><?= $totalProducts ?></span>
@@ -136,6 +136,20 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let currentCategory = 'all';
     let currentSearchTerm = '';
+    
+    // Check if there's a category in the URL hash
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        if (hash.startsWith('category-')) {
+            currentCategory = hash;
+            // Update active state in sidebar
+            setTimeout(() => {
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                const activeLink = document.querySelector(`.category-link[data-category="${hash}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }, 0);
+        }
+    }
     
     const allItems = Array.from(document.querySelectorAll('.product-item-col'));
     const sections = Array.from(document.querySelectorAll('.product-category-section'));

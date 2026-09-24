@@ -157,6 +157,50 @@
         })();
     </script>
     <script src="<?= asset('js/app.js') ?>"></script>
+    <script>
+    // AJAX for adding items to cart to prevent page reload and scroll jump
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (form.tagName === 'FORM' && (form.getAttribute('action') === 'index.php?page=cart' || form.getAttribute('action') === '<?= url("cart") ?>')) {
+            const actionInput = form.querySelector('input[name="action"]');
+            if (actionInput && actionInput.value === 'add') {
+                e.preventDefault();
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adding...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+                fetch('index.php?page=cart', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newCartLink = doc.getElementById('navbarCartLink');
+                    const currentCartLink = document.getElementById('navbarCartLink');
+                    if (newCartLink && currentCartLink) {
+                        currentCartLink.innerHTML = newCartLink.innerHTML;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+            }
+        }
+    });
+    </script>
     
     <!-- Google Analytics Consent & Integration -->
     <script>

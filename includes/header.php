@@ -137,7 +137,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                         <a class="nav-link" href="<?= url('home') ?>">Home</a>
                         <a class="nav-link" href="<?= url('products') ?>">Products</a>
                         <a class="nav-link" href="<?= asset('uploads/price-list.pdf') ?>" target="_blank">Price List</a>
-                        <a class="nav-link" href="<?= url('cart') ?>"><i class="fa-solid fa-cart-shopping me-1" aria-hidden="true"></i> Estimate (<?= number_format($cartAmount, 2) ?>)</a>
+                        <a class="nav-link" id="navbarCartLink" href="<?= url('cart') ?>"><i class="fa-solid fa-cart-shopping me-1" aria-hidden="true"></i> Estimate (<?= number_format($cartAmount, 2) ?>)</a>
                     <?php endif; ?>
                     <?php if (!empty($_SESSION['logged_in'])): ?>
                         <span class="nav-link nav-user">Hi, <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>

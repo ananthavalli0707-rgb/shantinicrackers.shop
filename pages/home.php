@@ -61,20 +61,175 @@ try {
 </section>
 <?php endif; ?>
 
-<!-- Shop By Category -->
-<section class="section-padding bg-surface">
+<!-- New Arrivals Section -->
+<?php
+$newArrivals = $pdo->query("SELECT products.*, products.image_url AS image, categories.name AS category_name FROM products JOIN categories ON categories.id = products.category_id WHERE categories.name = 'New Arrivals' ORDER BY products.id DESC")->fetchAll();
+if ($newArrivals):
+?>
+<section class="section-padding bg-surface border-bottom">
     <div class="container">
         <div class="section-header">
-            <span class="section-kicker">Discover</span>
-            <h2 class="h2-section">Shop By Category</h2>
+            <span class="section-kicker">Latest Collection</span>
+            <h2 class="h2-section">New Arrivals <span class="badge bg-danger ms-2" style="font-size: 0.9rem; vertical-align: middle;">HOT</span></h2>
         </div>
         <div class="row g-4">
-            <?php foreach ($menuCategories as $category): ?>
-            <div class="col-6 col-md-4 col-lg-3">
-                <a href="<?= url('products') ?>#category-<?= (int)$category['id'] ?>" class="catalog-card text-center p-4 text-decoration-none">
-                    <h3 class="h3-card mb-0"><?= htmlspecialchars($category['name']) ?></h3>
-                </a>
-            </div>
+            <?php foreach ($newArrivals as $product): ?>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="catalog-card">
+                        <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
+                            <div class="catalog-image-wrap">
+                                <?php if (!empty($product['image'])): ?>
+                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                <?php else: ?>
+                                    <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
+                                <?php endif; ?>
+                            </div>
+                        </a>
+                        <div class="card-body-content">
+                            <span class="card-category"><?= htmlspecialchars($product['category_name']) ?></span>
+                            <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
+                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                            </a>
+                            <div class="card-price-wrap mt-auto">
+                                <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>
+                                <?php if (!empty($product['actual_price']) && $product['actual_price'] != $product['discount_price']): ?>
+                                    <span class="price-old">₹<?= htmlspecialchars($product['actual_price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <form action="index.php?page=cart" method="POST">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="product_id" value="<?= (int)$product['id'] ?>">
+                                <div class="quantity-control">
+                                    <button type="button" class="quantity-btn" onclick="this.nextElementSibling.stepDown()">-</button>
+                                    <input type="number" name="quantity" class="quantity-input" value="1" min="1">
+                                    <button type="button" class="quantity-btn" onclick="this.previousElementSibling.stepUp()">+</button>
+                                </div>
+                                <button type="submit" class="btn-primary w-100">Add to Estimate</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Child Crackers Section -->
+<?php
+$childCrackers = $pdo->query("SELECT products.*, products.image_url AS image, categories.name AS category_name FROM products JOIN categories ON categories.id = products.category_id WHERE categories.name = 'Child Crackers' ORDER BY products.id DESC")->fetchAll();
+if ($childCrackers):
+?>
+<section class="section-padding bg-surface border-bottom" style="background-color: var(--bs-light) !important;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-kicker">For The Little Ones</span>
+            <h2 class="h2-section">Child Crackers <span class="badge bg-warning ms-2 text-dark" style="font-size: 0.9rem; vertical-align: middle;">KIDS</span></h2>
+        </div>
+        <div class="row g-4">
+            <?php foreach ($childCrackers as $product): ?>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="catalog-card">
+                        <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
+                            <div class="catalog-image-wrap">
+                                <?php if (!empty($product['image'])): ?>
+                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                <?php else: ?>
+                                    <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
+                                <?php endif; ?>
+                            </div>
+                        </a>
+                        <div class="card-body-content">
+                            <span class="card-category"><?= htmlspecialchars($product['category_name']) ?></span>
+                            <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
+                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                            </a>
+                            <div class="card-price-wrap mt-auto">
+                                <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>
+                                <?php if (!empty($product['actual_price']) && $product['actual_price'] != $product['discount_price']): ?>
+                                    <span class="price-old">₹<?= htmlspecialchars($product['actual_price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <form action="index.php?page=cart" method="POST">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="product_id" value="<?= (int)$product['id'] ?>">
+                                <div class="quantity-control">
+                                    <button type="button" class="quantity-btn" onclick="this.nextElementSibling.stepDown()">-</button>
+                                    <input type="number" name="quantity" class="quantity-input" value="1" min="1">
+                                    <button type="button" class="quantity-btn" onclick="this.previousElementSibling.stepUp()">+</button>
+                                </div>
+                                <button type="submit" class="btn-primary w-100">Add to Estimate</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Shop By Category -->
+<style>
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--bs-white);
+    border-radius: 50px;
+    color: var(--bs-heading-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.category-pill:hover {
+    background: var(--bs-primary);
+    color: white;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(var(--bs-primary-rgb), 0.25);
+    border-color: var(--bs-primary);
+}
+.category-pill:hover .category-pill-icon {
+    transform: rotate(15deg) scale(1.2);
+}
+.category-pill-icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+</style>
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-kicker">Explore The Magic</span>
+            <h2 class="h2-section">Shop By Category</h2>
+        </div>
+        <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+            <?php 
+            foreach ($menuCategories as $category): 
+                $catName = strtolower($category['name']);
+                $icon = '🎇'; // default
+                
+                if (strpos($catName, 'new arrival') !== false) $icon = '🆕';
+                elseif (strpos($catName, 'child') !== false || strpos($catName, 'kid') !== false) $icon = '🧸';
+                elseif (strpos($catName, 'sparkler') !== false) $icon = '✨';
+                elseif (strpos($catName, 'flower pot') !== false || strpos($catName, 'chakar') !== false || strpos($catName, 'chakkar') !== false) $icon = '💮';
+                elseif (strpos($catName, 'bomb') !== false || strpos($catName, 'atom') !== false) $icon = '💣';
+                elseif (strpos($catName, 'rocket') !== false) $icon = '🚀';
+                elseif (strpos($catName, 'sky') !== false || strpos($catName, 'shot') !== false) $icon = '🌌';
+                elseif (strpos($catName, 'gift') !== false || strpos($catName, 'box') !== false) $icon = '🎁';
+                elseif (strpos($catName, 'fancy') !== false || strpos($catName, 'novel') !== false) $icon = '🎊';
+                elseif (strpos($catName, 'garland') !== false || strpos($catName, 'wala') !== false || strpos($catName, 'lar') !== false) $icon = '🏮';
+                elseif (strpos($catName, 'match') !== false) $icon = '🔥';
+            ?>
+            <a href="<?= url('products') ?>#category-<?= (int)$category['id'] ?>" class="category-pill">
+                <span class="category-pill-icon"><?= $icon ?></span>
+                <span class="category-pill-text"><?= htmlspecialchars($category['name']) ?></span>
+            </a>
             <?php endforeach; ?>
         </div>
     </div>
