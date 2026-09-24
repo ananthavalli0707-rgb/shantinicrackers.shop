@@ -62,7 +62,7 @@ function url($page, $params = []) {
 }
 
 $currentPage = $_GET['page'] ?? 'home';
-$isAdminArea = !empty($_SESSION['is_admin']) || str_starts_with($currentPage, 'admin-');
+$isAdminArea = str_starts_with($currentPage, 'admin-');
 $menuCategories = [];
 if (!$isAdminArea) {
     $menuCategories = $pdo->query('SELECT id, name FROM categories ORDER BY name')->fetchAll();
