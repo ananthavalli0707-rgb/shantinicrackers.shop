@@ -81,8 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
             $discountedTotal += (float)$item['discount_price'] * $item['quantity'];
         }
         $discountTotal = $actualTotal - $discountedTotal;
-        $packagingTotal = round($discountedTotal * 0.03, 2);
-        $amount = round($discountedTotal + $packagingTotal, 2);
+        $amount = round($discountedTotal, 2);
 
         $minAmount = ($state === 'Tamil Nadu') ? 3000 : 5000;
         if ($amount < $minAmount) {
@@ -116,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 foreach ($dbItems as $item) {
                     $message .= "- {$item['name']} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
                 }
-                $message .= "\nActual total: Rs. " . number_format($actualTotal, 2) . "\nDiscount: Rs. " . number_format($discountTotal, 2) . "\nPackaging: Rs. " . number_format($packagingTotal, 2) . "\nEstimate amount: Rs. " . number_format($amount, 2);
+                $message .= "\nActual total: Rs. " . number_format($actualTotal, 2) . "\nDiscount: Rs. " . number_format($discountTotal, 2) . "\nEstimate amount: Rs. " . number_format($amount, 2);
 
                 $mailResult = send_smtp_email($email, "Shantini Crackers Estimate Request #{$inquiryId}", $message, false);
                 $emailSent = $mailResult['success'];
@@ -150,8 +149,7 @@ foreach ($_SESSION['cart'] as $productId => $quantity) {
     $cartItems[] = $product;
 }
 $discountTotal = $actualTotal - $discountedTotal;
-$packagingTotal = round($discountedTotal * 0.03, 2);
-$amount = round($discountedTotal + $packagingTotal, 2);
+$amount = round($discountedTotal, 2);
 ?>
 
 <div class="section-padding bg-surface">
@@ -271,10 +269,7 @@ $amount = round($discountedTotal + $packagingTotal, 2);
                             <span>Discount Saving</span>
                             <span>- ₹<?= number_format($discountTotal, 2) ?></span>
                         </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">Packaging (3%)</span>
-                            <span class="fw-bold">₹<?= number_format($packagingTotal, 2) ?></span>
-                        </div>
+
                         
                         <div class="d-flex justify-content-between mt-4 pt-4 border-top">
                             <span class="h3-card mb-0">Estimated Amount</span>
