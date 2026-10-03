@@ -76,6 +76,11 @@ endif;
                             </button>
                         </div>
                     </div>
+                    
+                    <div class="mt-4 alert alert-warning p-3 small shadow-sm border-warning rounded text-start">
+                        <div class="mb-2 text-dark"><strong>⚠️ Important:</strong> Delivered via Lorry Transport only. You will need to pick up the parcel from your nearest city/town lorry godown.</div>
+                        <div class="text-dark"><strong>⚠️ முக்கிய அறிவிப்பு:</strong> லாரி டிரான்ஸ்போர்ட் மூலம் மட்டுமே டெலிவரி செய்யப்படும். உங்கள் ஊர் லாரி ஷெட்டிற்கு நேரில் சென்று பார்சலை பெற்றுக் கொள்ள வேண்டும்.</div>
+                    </div>
                 </form>
                 
                 <div class="mt-5 p-4 bg-light rounded text-center">

@@ -15,9 +15,7 @@
                 <!-- Brand and About -->
                 <div class="col-12 col-lg-4">
                     <div class="footer-brand d-flex align-items-center gap-3 mb-4">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 48px; height: 48px; font-size: 1.5rem;">
-                            🎇
-                        </div>
+                        <img src="<?= asset('img/shantini_logo.png') ?>" alt="Shantini Crackers Logo" style="height: 48px; width: auto; border-radius: 8px;" class="shadow-sm">
                         <span class="fs-3 fw-bold text-white" style="font-family: var(--font-heading); letter-spacing: -0.5px;">Shantini Crackers</span>
                     </div>
                     <p class="text-white-50 lh-lg pe-lg-4 mb-4">
@@ -55,6 +53,8 @@
                     <ul class="list-unstyled footer-links mb-0 d-flex flex-column gap-3">
                         <li><a href="<?= url('terms') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Terms of Use</a></li>
                         <li><a href="<?= url('privacy') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Privacy Policy</a></li>
+                        <li><a href="<?= url('shipping') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Shipping & Delivery</a></li>
+                        <li><a href="<?= url('refund') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Refund & Cancellation</a></li>
                     </ul>
                 </div>
 

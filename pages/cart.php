@@ -120,9 +120,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 $mailResult = send_smtp_email($email, "Shantini Crackers Estimate Request #{$inquiryId}", $message, false);
                 $emailSent = $mailResult['success'];
 
+                require_once __DIR__ . '/../includes/whatsapp.php';
+                
+                // 1. Send automated message to Admin
+                $waAdminResult = send_whatsapp_message($adminWhatsAppNumber, $message);
+                
+                // 2. Send automated confirmation to Customer
+                $customerMessage = "Hi {$shippingName},\n\nYour estimate request #{$inquiryId} has been successfully received by Shantini Crackers.\n\nTotal Estimated Amount: Rs. " . number_format($amount, 2) . "\n\nWe will review your request and get back to you shortly!\n\nThank you for choosing us! 🎇";
+                $waCustomerResult = send_whatsapp_message($whatsappPhone, $customerMessage);
+
                 $_SESSION['cart'] = [];
-                $_SESSION['inquiry_success'] = 'Request #' . (int)$inquiryId . ' was saved. ' . ($emailSent ? 'The confirmation email was accepted for delivery to ' . $email . '.' : 'The request was saved, but the confirmation email could not be sent because the server email service is not configured.') . ' WhatsApp will open on your device with this message addressed to the admin. Press Send to notify the admin.';
-                header('Location: https://wa.me/' . $adminWhatsAppNumber . '?text=' . rawurlencode($message));
+                $_SESSION['inquiry_success'] = 'Your request #' . (int)$inquiryId . ' has been successfully submitted! We have sent a confirmation to your WhatsApp and our admin will contact you shortly.';
+                
+                header('Location: ' . url('cart'));
                 exit;
             } catch (PDOException $exception) {
                 if ($pdo->inTransaction()) {
@@ -308,8 +318,24 @@ $amount = round($discountedTotal, 2);
                             
                             <div id="limitWarning" class="alert alert-warning d-none mb-3 small fw-bold shadow-sm"></div>
 
+                            <div class="form-check mb-2 bg-light p-3 rounded border text-start">
+                                <input class="form-check-input ms-0 me-2 mt-1 border-primary" type="checkbox" value="1" id="deliveryTermsCheck" required style="width: 1.2rem; height: 1.2rem;">
+                                <label class="form-check-label text-muted small lh-base d-block" for="deliveryTermsCheck" style="margin-left: 1.8rem; cursor: pointer;">
+                                    <span class="text-dark fw-bold">I understand that my order will be sent via Lorry Transport and I agree to collect it from the nearest transport hub.</span><br>
+                                    (லாரி டிரான்ஸ்போர்ட் மூலம் அனுப்பப்படும் பார்சலை நான் நேரில் சென்று பெற்றுக்கொள்கிறேன் என்பதை ஒப்புக்கொள்கிறேன்).
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-4 bg-light p-3 rounded border text-start">
+                                <input class="form-check-input ms-0 me-2 mt-1 border-primary" type="checkbox" value="1" id="refundTermsCheck" required style="width: 1.2rem; height: 1.2rem;">
+                                <label class="form-check-label text-muted small lh-base d-block" for="refundTermsCheck" style="margin-left: 1.8rem; cursor: pointer;">
+                                    <span class="text-dark fw-bold">I agree to the Terms & Conditions, Shipping Policy, and Refund & Cancellation Policy.</span><br>
+                                    (நான் விதிமுறைகள் மற்றும் பணம் திரும்பப் பெறாமைக்கான கொள்கைகளை ஒப்புக்கொள்கிறேன்).
+                                </label>
+                            </div>
+
                             <button type="submit" id="submitBtn" class="w-100 py-3 mt-2 shadow-sm" style="background: #25D366; color: white; border: none; border-radius: var(--radius-sm); font-weight: bold; font-size: 1.1rem; transition: transform 0.2s;">
-                                <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Send via WhatsApp
+                                <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Submit Request
                             </button>
                         </form>
                     </div>

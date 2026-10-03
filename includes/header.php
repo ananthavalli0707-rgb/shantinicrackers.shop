@@ -107,6 +107,9 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 </head>
 <body data-theme="light">
     <?php if (empty($isStandalonePage) && !$isAdminArea): ?>
+        <div class="bg-primary text-white text-center py-2 px-3 fw-bold small shadow-sm d-block" style="z-index: 1050; position: relative;">
+            <i class="fa-solid fa-truck-fast me-2 fs-6"></i> 🚚 All-over Tamil Nadu Delivery via Lorry Transport! Book early to avoid delays. (தமிழ்நாடு முழுவதும் லாரி மூலம் டெலிவரி! தாமதத்தைத் தவிர்க்க முன்கூட்டியே புக் செய்யவும்).
+        </div>
         <div class="marquee-banner">
             <div class="container">
                 <marquee behavior="scroll" direction="left" scrollamount="6">

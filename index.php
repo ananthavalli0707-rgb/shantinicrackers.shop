@@ -102,6 +102,12 @@ switch ($page) {
     case 'privacy':
         include __DIR__ . '/pages/privacy.php';
         break;
+    case 'shipping':
+        include __DIR__ . '/pages/shipping.php';
+        break;
+    case 'refund':
+        include __DIR__ . '/pages/refund.php';
+        break;
     default:
         include __DIR__ . '/pages/home.php';
         break;
