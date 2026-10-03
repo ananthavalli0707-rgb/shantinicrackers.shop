@@ -108,31 +108,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 }
                 $pdo->commit();
 
-                $message = "Shantini Crackers Estimate Request #{$inquiryId}\n\nName: {$shippingName}\nAddress: {$address1}";
-                $message .= "\nCity: {$city}\nState: {$state}\nPincode: {$pincode}";
-                $message .= "\nCustomer WhatsApp: {$whatsappPhone}";
-                $message .= "\nEmail: {$email}\n\nProducts:\n";
+                $my_number = "919786361678";
+                
+                $text = "வணக்கம் Shantini Crackers! எனது எஸ்டிமேட் விபரம் இதோ:\n\n";
+                $text .= "Request #: {$inquiryId}\n";
+                $text .= "பெயர் (Name): {$shippingName}\n";
+                $text .= "முகவரி (Address): {$address1}, {$city}, {$state} - {$pincode}\n";
+                $text .= "வாட்ஸ்அப் (WhatsApp): {$whatsappPhone}\n\n";
+                $text .= "Products:\n";
                 foreach ($dbItems as $item) {
-                    $message .= "- {$item['name']} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
+                    $text .= "- {$item['name']} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
                 }
-                $message .= "\nActual total: Rs. " . number_format($actualTotal, 2) . "\nDiscount: Rs. " . number_format($discountTotal, 2) . "\nEstimate amount: Rs. " . number_format($amount, 2);
+                $text .= "\nமொத்தத் தொகை (Estimated Amount): Rs. " . number_format($amount, 2);
 
-                $mailResult = send_smtp_email($email, "Shantini Crackers Estimate Request #{$inquiryId}", $message, false);
+                $mailResult = send_smtp_email($email, "Shantini Crackers Estimate Request #{$inquiryId}", $text, false);
                 $emailSent = $mailResult['success'];
 
-                require_once __DIR__ . '/../includes/whatsapp.php';
-                
-                // 1. Send automated message to Admin
-                $waAdminResult = send_whatsapp_message($adminWhatsAppNumber, $message);
-                
-                // 2. Send automated confirmation to Customer
-                $customerMessage = "Hi {$shippingName},\n\nYour estimate request #{$inquiryId} has been successfully received by Shantini Crackers.\n\nTotal Estimated Amount: Rs. " . number_format($amount, 2) . "\n\nWe will review your request and get back to you shortly!\n\nThank you for choosing us! 🎇";
-                $waCustomerResult = send_whatsapp_message($whatsappPhone, $customerMessage);
-
                 $_SESSION['cart'] = [];
-                $_SESSION['inquiry_success'] = 'Your request #' . (int)$inquiryId . ' has been successfully submitted! We have sent a confirmation to your WhatsApp and our admin will contact you shortly.';
+                $_SESSION['inquiry_success'] = 'Request #' . (int)$inquiryId . ' was saved. WhatsApp will open on your device with this message addressed to the admin. Press Send to notify the admin.';
                 
-                header('Location: ' . url('cart'));
+                $whatsapp_url = "https://api.whatsapp.com/send?phone=" . $my_number . "&text=" . rawurlencode($text);
+                header('Location: ' . $whatsapp_url);
                 exit;
             } catch (PDOException $exception) {
                 if ($pdo->inTransaction()) {
@@ -335,7 +331,7 @@ $amount = round($discountedTotal, 2);
                             </div>
 
                             <button type="submit" id="submitBtn" class="w-100 py-3 mt-2 shadow-sm" style="background: #25D366; color: white; border: none; border-radius: var(--radius-sm); font-weight: bold; font-size: 1.1rem; transition: transform 0.2s;">
-                                <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Submit Request
+                                <i class="fa-brands fa-whatsapp me-2 fs-4 align-middle"></i> Send via WhatsApp
                             </button>
                         </form>
                     </div>
