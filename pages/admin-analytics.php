@@ -6,20 +6,21 @@ if (empty($_SESSION['is_admin'])) {
 }
 
 try {
-    $selectedDate = $_GET['date'] ?? date('Y-m-d');
-    $isToday = $selectedDate === date('Y-m-d');
+    $startDate = $_GET['start_date'] ?? date('Y-m-d');
+    $endDate = $_GET['end_date'] ?? date('Y-m-d');
+    $isToday = $startDate === date('Y-m-d') && $endDate === date('Y-m-d');
 
-    // Fetch stats
+    // Fetch stats (All time)
     $totalVisits = $pdo->query('SELECT COUNT(*) FROM page_views')->fetchColumn();
     $uniqueVisitors = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views')->fetchColumn();
 
-    // Selected Date stats
-    $stmtDateVisits = $pdo->prepare('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) = ?');
-    $stmtDateVisits->execute([$selectedDate]);
+    // Selected Date Range stats
+    $stmtDateVisits = $pdo->prepare('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) BETWEEN ? AND ?');
+    $stmtDateVisits->execute([$startDate, $endDate]);
     $dateVisitsCount = $stmtDateVisits->fetchColumn();
 
-    $stmtDateUnique = $pdo->prepare('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) = ?');
-    $stmtDateUnique->execute([$selectedDate]);
+    $stmtDateUnique = $pdo->prepare('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) BETWEEN ? AND ?');
+    $stmtDateUnique->execute([$startDate, $endDate]);
     $dateUniqueCount = $stmtDateUnique->fetchColumn();
 
     // Top pages (All Time)
@@ -31,15 +32,15 @@ try {
         LIMIT 10
     ')->fetchAll();
 
-    // Activity on selected date
+    // Activity on selected date range
     $stmtRecent = $pdo->prepare('
         SELECT page_url, ip_address, user_agent, created_at 
         FROM page_views 
-        WHERE DATE(created_at) = ?
+        WHERE DATE(created_at) BETWEEN ? AND ?
         ORDER BY created_at DESC 
         LIMIT 50
     ');
-    $stmtRecent->execute([$selectedDate]);
+    $stmtRecent->execute([$startDate, $endDate]);
     $recentVisitors = $stmtRecent->fetchAll();
     // 20-Day Trend
     $trend = $pdo->query('
@@ -81,10 +82,15 @@ for ($i = 19; $i >= 0; $i--) {
         <h2 class="fw-bold mb-0">Visitor Analytics Dashboard</h2>
         <form method="GET" action="<?= url('admin-analytics') ?>" class="d-flex align-items-center gap-2">
             <input type="hidden" name="page" value="admin-analytics">
-            <label class="fw-medium text-muted mb-0">Date:</label>
-            <input type="date" name="date" class="form-control form-control-sm" value="<?= htmlspecialchars($selectedDate) ?>" onchange="this.form.submit()" max="<?= date('Y-m-d') ?>">
+            <div class="d-flex align-items-center gap-1 bg-white border rounded px-2">
+                <label class="fw-medium text-muted small mb-0">From:</label>
+                <input type="date" name="start_date" class="form-control form-control-sm border-0 shadow-none" value="<?= htmlspecialchars($startDate) ?>" max="<?= date('Y-m-d') ?>">
+                <label class="fw-medium text-muted small mb-0 ms-2">To:</label>
+                <input type="date" name="end_date" class="form-control form-control-sm border-0 shadow-none" value="<?= htmlspecialchars($endDate) ?>" max="<?= date('Y-m-d') ?>">
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
             <?php if (!$isToday): ?>
-                <a href="<?= url('admin-analytics') ?>" class="btn btn-sm btn-outline-primary ms-2">Today</a>
+                <a href="<?= url('admin-analytics') ?>" class="btn btn-sm btn-outline-secondary">Today</a>
             <?php endif; ?>
         </form>
     </div>
@@ -100,14 +106,14 @@ for ($i = 19; $i >= 0; $i--) {
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-primary text-white text-center p-4 h-100">
                 <i class="fa-solid fa-eye fs-1 mb-2 opacity-75"></i>
-                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Views" : "Views on " . date('M d', strtotime($selectedDate)) ?></h5>
+                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Views" : "Filtered Views" ?></h5>
                 <h2 class="display-5 fw-bold mb-0"><?= number_format($dateVisitsCount) ?></h2>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-info text-white text-center p-4 h-100">
                 <i class="fa-solid fa-users fs-1 mb-2 opacity-75"></i>
-                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Visitors" : "Visitors on " . date('M d', strtotime($selectedDate)) ?></h5>
+                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Visitors" : "Filtered Visitors" ?></h5>
                 <h2 class="display-5 fw-bold mb-0"><?= number_format($dateUniqueCount) ?></h2>
             </div>
         </div>
@@ -178,7 +184,7 @@ for ($i = 19; $i >= 0; $i--) {
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Activity on <?= date('M d, Y', strtotime($selectedDate)) ?></h5>
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Activity (<?= $isToday ? 'Today' : 'Filtered' ?>)</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
