@@ -5,17 +5,19 @@ echo "<pre>";
 
 // 1. Add Columns to Database if they don't exist
 try {
-    $pdo->exec("ALTER TABLE categories ADD COLUMN tamil_name VARCHAR(255) DEFAULT NULL;");
+    $pdo->exec("ALTER TABLE categories ADD COLUMN tamil_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;");
     echo "Added 'tamil_name' column to categories.\n";
 } catch (Exception $e) {
-    echo "categories 'tamil_name' column already exists.\n";
+    $pdo->exec("ALTER TABLE categories MODIFY COLUMN tamil_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;");
+    echo "categories 'tamil_name' column already exists (forced UTF-8).\n";
 }
 
 try {
-    $pdo->exec("ALTER TABLE products ADD COLUMN tamil_name VARCHAR(255) DEFAULT NULL;");
+    $pdo->exec("ALTER TABLE products ADD COLUMN tamil_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;");
     echo "Added 'tamil_name' column to products.\n";
 } catch (Exception $e) {
-    echo "products 'tamil_name' column already exists.\n";
+    $pdo->exec("ALTER TABLE products MODIFY COLUMN tamil_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;");
+    echo "products 'tamil_name' column already exists (forced UTF-8).\n";
 }
 
 try {
@@ -49,8 +51,8 @@ $categories = [
 ];
 
 foreach ($categories as $en => $ta) {
-    $stmt = $pdo->prepare('UPDATE categories SET tamil_name = :ta WHERE name = :en');
-    $stmt->execute(['ta' => $ta, 'en' => $en]);
+    $stmt = $pdo->prepare('UPDATE categories SET tamil_name = :ta WHERE TRIM(name) = :en');
+    $stmt->execute(['ta' => $ta, 'en' => trim($en)]);
 }
 echo "Categories updated.\n";
 
@@ -135,8 +137,8 @@ $products = [
 ];
 
 foreach ($products as $en => $ta) {
-    $stmt = $pdo->prepare('UPDATE products SET tamil_name = :ta WHERE name = :en');
-    $stmt->execute(['ta' => $ta, 'en' => $en]);
+    $stmt = $pdo->prepare('UPDATE products SET tamil_name = :ta WHERE TRIM(name) = :en');
+    $stmt->execute(['ta' => $ta, 'en' => trim($en)]);
 }
 echo "Products updated.\n";
 echo "SUCCESS: Online Database synced completely!\n";
