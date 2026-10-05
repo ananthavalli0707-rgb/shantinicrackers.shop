@@ -6,15 +6,23 @@ if (empty($_SESSION['is_admin'])) {
 }
 
 try {
+    $selectedDate = $_GET['date'] ?? date('Y-m-d');
+    $isToday = $selectedDate === date('Y-m-d');
+
     // Fetch stats
     $totalVisits = $pdo->query('SELECT COUNT(*) FROM page_views')->fetchColumn();
     $uniqueVisitors = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views')->fetchColumn();
 
-    // Today's stats
-    $todayVisits = $pdo->query('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
-    $todayUnique = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
+    // Selected Date stats
+    $stmtDateVisits = $pdo->prepare('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) = ?');
+    $stmtDateVisits->execute([$selectedDate]);
+    $dateVisitsCount = $stmtDateVisits->fetchColumn();
 
-    // Top pages
+    $stmtDateUnique = $pdo->prepare('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) = ?');
+    $stmtDateUnique->execute([$selectedDate]);
+    $dateUniqueCount = $stmtDateUnique->fetchColumn();
+
+    // Top pages (All Time)
     $topPages = $pdo->query('
         SELECT page_url, COUNT(*) as views 
         FROM page_views 
@@ -23,13 +31,16 @@ try {
         LIMIT 10
     ')->fetchAll();
 
-    // Recent visitors
-    $recentVisitors = $pdo->query('
-        SELECT page_url, ip_address, created_at 
+    // Activity on selected date
+    $stmtRecent = $pdo->prepare('
+        SELECT page_url, ip_address, user_agent, created_at 
         FROM page_views 
+        WHERE DATE(created_at) = ?
         ORDER BY created_at DESC 
-        LIMIT 15
-    ')->fetchAll();
+        LIMIT 50
+    ');
+    $stmtRecent->execute([$selectedDate]);
+    $recentVisitors = $stmtRecent->fetchAll();
     // 20-Day Trend
     $trend = $pdo->query('
         SELECT DATE(created_at) as date, COUNT(*) as views, COUNT(DISTINCT ip_address) as visitors
@@ -39,7 +50,7 @@ try {
         ORDER BY date ASC
     ')->fetchAll();
 } catch (PDOException $e) {
-    $totalVisits = $uniqueVisitors = $todayVisits = $todayUnique = 0;
+    $totalVisits = $uniqueVisitors = $dateVisitsCount = $dateUniqueCount = 0;
     $topPages = $recentVisitors = $trend = [];
     $error = "Analytics table missing! Please run yourdomain.com/sync_online_db.php to install the tracker.";
 }
@@ -68,6 +79,14 @@ for ($i = 19; $i >= 0; $i--) {
 <section>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Visitor Analytics Dashboard</h2>
+        <form method="GET" action="<?= url('admin-analytics') ?>" class="d-flex align-items-center gap-2">
+            <input type="hidden" name="page" value="admin-analytics">
+            <label class="fw-medium text-muted mb-0">Date:</label>
+            <input type="date" name="date" class="form-control form-control-sm" value="<?= htmlspecialchars($selectedDate) ?>" onchange="this.form.submit()" max="<?= date('Y-m-d') ?>">
+            <?php if (!$isToday): ?>
+                <a href="<?= url('admin-analytics') ?>" class="btn btn-sm btn-outline-primary ms-2">Today</a>
+            <?php endif; ?>
+        </form>
     </div>
 
     <?php if (!empty($error)): ?>
@@ -81,15 +100,15 @@ for ($i = 19; $i >= 0; $i--) {
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-primary text-white text-center p-4 h-100">
                 <i class="fa-solid fa-eye fs-1 mb-2 opacity-75"></i>
-                <h5 class="fw-bold mb-0">Today's Views</h5>
-                <h2 class="display-5 fw-bold mb-0"><?= number_format($todayVisits) ?></h2>
+                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Views" : "Views on " . date('M d', strtotime($selectedDate)) ?></h5>
+                <h2 class="display-5 fw-bold mb-0"><?= number_format($dateVisitsCount) ?></h2>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-info text-white text-center p-4 h-100">
                 <i class="fa-solid fa-users fs-1 mb-2 opacity-75"></i>
-                <h5 class="fw-bold mb-0">Today's Visitors</h5>
-                <h2 class="display-5 fw-bold mb-0"><?= number_format($todayUnique) ?></h2>
+                <h5 class="fw-bold mb-0"><?= $isToday ? "Today's Visitors" : "Visitors on " . date('M d', strtotime($selectedDate)) ?></h5>
+                <h2 class="display-5 fw-bold mb-0"><?= number_format($dateUniqueCount) ?></h2>
             </div>
         </div>
         <div class="col-md-3">
@@ -159,7 +178,7 @@ for ($i = 19; $i >= 0; $i--) {
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Live Recent Activity</h5>
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Activity on <?= date('M d, Y', strtotime($selectedDate)) ?></h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
