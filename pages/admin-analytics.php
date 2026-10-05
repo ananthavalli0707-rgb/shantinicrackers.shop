@@ -30,11 +30,39 @@ try {
         ORDER BY created_at DESC 
         LIMIT 15
     ')->fetchAll();
+    // 20-Day Trend
+    $trend = $pdo->query('
+        SELECT DATE(created_at) as date, COUNT(*) as views, COUNT(DISTINCT ip_address) as visitors
+        FROM page_views 
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 20 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+    ')->fetchAll();
 } catch (PDOException $e) {
     $totalVisits = $uniqueVisitors = $todayVisits = $todayUnique = 0;
-    $topPages = $recentVisitors = [];
+    $topPages = $recentVisitors = $trend = [];
     $error = "Analytics table missing! Please run yourdomain.com/sync_online_db.php to install the tracker.";
 }
+
+// Prepare Chart.js data
+$chartDates = [];
+$chartViews = [];
+$chartVisitors = [];
+
+// Fill in missing dates with zero for a smooth 20-day chart
+$today = time();
+$trendMap = [];
+foreach ($trend as $t) {
+    $trendMap[$t['date']] = $t;
+}
+
+for ($i = 19; $i >= 0; $i--) {
+    $dateStr = date('Y-m-d', strtotime("-$i days", $today));
+    $chartDates[] = date('M d', strtotime($dateStr));
+    $chartViews[] = $trendMap[$dateStr]['views'] ?? 0;
+    $chartVisitors[] = $trendMap[$dateStr]['visitors'] ?? 0;
+}
+
 ?>
 
 <section>
@@ -76,6 +104,16 @@ try {
                 <i class="fa-solid fa-globe fs-1 mb-2 opacity-75"></i>
                 <h5 class="fw-bold mb-0">All Time Visitors</h5>
                 <h2 class="display-5 fw-bold mb-0"><?= number_format($uniqueVisitors) ?></h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- 20 Day Trend Chart -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 p-4">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-chart-area text-primary me-2"></i> Last 20 Days Traffic Trend</h5>
+                <canvas id="trafficChart" height="80"></canvas>
             </div>
         </div>
     </div>
@@ -171,5 +209,45 @@ try {
         </div>
     </div>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('trafficChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?= json_encode($chartDates) ?>,
+            datasets: [
+                {
+                    label: 'Page Views',
+                    data: <?= json_encode($chartViews) ?>,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Unique Visitors',
+                    data: <?= json_encode($chartVisitors) ?>,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+});
+</script>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>
