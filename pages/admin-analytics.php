@@ -130,11 +130,20 @@ try {
                                 <tr>
                                     <th class="ps-4">Time</th>
                                     <th>Page</th>
-                                    <th class="pe-4">Visitor IP</th>
+                                    <th>Visitor IP</th>
+                                    <th class="pe-4">Device Info</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($recentVisitors as $visit): ?>
+                                <?php foreach ($recentVisitors as $visit): 
+                                    $ua = $visit['user_agent'] ?? '';
+                                    $device = stripos($ua, 'mobile') !== false ? 'fa-mobile-screen' : 'fa-laptop';
+                                    $os = 'fa-desktop';
+                                    if (stripos($ua, 'windows') !== false) $os = 'fa-windows';
+                                    elseif (stripos($ua, 'mac') !== false || stripos($ua, 'iphone') !== false) $os = 'fa-apple';
+                                    elseif (stripos($ua, 'android') !== false) $os = 'fa-android';
+                                    elseif (stripos($ua, 'linux') !== false) $os = 'fa-linux';
+                                ?>
                                 <tr>
                                     <td class="ps-4 text-muted small">
                                         <?= date('h:i A (d M)', strtotime($visit['created_at'])) ?>
@@ -142,8 +151,12 @@ try {
                                     <td>
                                         <span class="text-primary fw-medium">/<?= htmlspecialchars($visit['page_url']) ?></span>
                                     </td>
-                                    <td class="pe-4 text-muted small">
+                                    <td class="text-muted small">
                                         <?= htmlspecialchars(substr($visit['ip_address'], 0, 10)) ?>***
+                                    </td>
+                                    <td class="pe-4 text-muted">
+                                        <i class="fa-solid <?= $device ?> me-2"></i>
+                                        <i class="fa-brands <?= $os ?>"></i>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
