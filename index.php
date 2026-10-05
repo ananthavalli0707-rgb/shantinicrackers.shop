@@ -1,6 +1,21 @@
 <?php
 $page = $_GET['page'] ?? 'home';
 
+// Track visitor in database (ignore admin pages)
+if (!str_starts_with($page, 'admin-')) {
+    require_once __DIR__ . '/config/db.php';
+    try {
+        $trackStmt = $pdo->prepare('INSERT INTO page_views (page_url, ip_address, user_agent) VALUES (?, ?, ?)');
+        $trackStmt->execute([
+            $page,
+            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            substr($_SERVER['HTTP_USER_AGENT'] ?? 'unknown', 0, 250)
+        ]);
+    } catch (Exception $e) {
+        // Ignore tracking errors so it doesn't break the site
+    }
+}
+
 switch ($page) {
     case 'home':
         include __DIR__ . '/pages/home.php';
@@ -54,6 +69,9 @@ switch ($page) {
         break;
     case 'admin-edit-product':
         include __DIR__ . '/pages/admin-edit-product.php';
+        break;
+    case 'admin-analytics':
+        include __DIR__ . '/pages/admin-analytics.php';
         break;
     case 'admin-reports':
         include __DIR__ . '/pages/admin-reports.php';

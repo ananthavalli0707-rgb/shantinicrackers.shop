@@ -34,6 +34,7 @@ $inquiryCount = (int)$pdo->query('SELECT COUNT(*) FROM inquiries')->fetchColumn(
         <a href="<?= url('admin-add-product') ?>" class="btn btn-danger">Add Product</a>
         <a href="<?= url('admin-inquiries') ?>" class="btn btn-outline-dark">Enquiries (<?= $inquiryCount ?>)</a>
         <a href="<?= url('admin-reports') ?>" class="btn btn-outline-primary">Tracking Report</a>
+        <a href="<?= url('admin-analytics') ?>" class="btn btn-outline-success">Visitor Analytics</a>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle admin-table">
