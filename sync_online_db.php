@@ -27,6 +27,13 @@ try {
     echo "Toggle columns in inquiries already exist.\n";
 }
 
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS page_views (id INT AUTO_INCREMENT PRIMARY KEY, page_url VARCHAR(255) NOT NULL, ip_address VARCHAR(45) NOT NULL, user_agent VARCHAR(255) NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX (created_at));");
+    echo "Added 'page_views' table for Analytics.\n";
+} catch (Exception $e) {
+    echo "page_views table creation error: " . $e->getMessage() . "\n";
+}
+
 // 2. Perform Translations
 $categories = [
     'Single Sound Crackers' => 'ஒற்றை வெடி',
