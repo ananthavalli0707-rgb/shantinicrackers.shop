@@ -34,7 +34,6 @@ $recentVisitors = $pdo->query('
 <section>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Visitor Analytics Dashboard</h2>
-        <a href="<?= url('admin-dashboard') ?>" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
     </div>
 
     <!-- Quick Stats -->

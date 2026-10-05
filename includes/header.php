@@ -145,7 +145,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     <?php if (!empty($_SESSION['logged_in'])): ?>
                         <span class="nav-link nav-user">Hi, <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
                         <?php if (!empty($_SESSION['is_admin'])): ?>
-                            <a class="nav-link" href="<?= url('admin-dashboard') ?>">Admin Dashboard</a>
+                            <a class="nav-link" href="<?= url('admin-analytics') ?>">Admin Analytics</a>
                         <?php endif; ?>
                         <?php $logoutRoute = !empty($_SESSION['is_admin']) ? 'admin-logout' : 'logout'; ?>
                         <form method="POST" action="<?= url($logoutRoute) ?>" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="nav-link btn btn-link p-0 border-0">Logout</button></form>
@@ -190,6 +190,11 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                         <h6 class="text-uppercase text-muted fw-bold mb-0" style="letter-spacing: 1px;">Admin Portal</h6>
                     </div>
                     <ul class="nav nav-pills flex-column mb-auto gap-2">
+                        <li class="nav-item">
+                            <a href="<?= url('admin-analytics') ?>" class="nav-link fw-medium <?= str_starts_with($currentPage, 'admin-analytics') ? 'active bg-primary text-white shadow-sm' : 'text-main' ?>">
+                                <i class="fa-solid fa-chart-pie me-2"></i> Analytics
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="<?= url('admin-dashboard') ?>" class="nav-link fw-medium <?= str_starts_with($currentPage, 'admin-dashboard') || str_starts_with($currentPage, 'admin-add-product') || str_starts_with($currentPage, 'admin-edit-product') ? 'active bg-primary text-white shadow-sm' : 'text-main' ?>">
                                 <i class="fa-solid fa-box me-2"></i> Products

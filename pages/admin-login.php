@@ -4,7 +4,7 @@ require __DIR__ . '/../includes/header.php';
 
 $error = null;
 if (!empty($_SESSION['is_admin'])) {
-    redirect('admin-dashboard');
+    redirect('admin-analytics');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_phone'] = preg_replace('/\D+/', '', $admin['phone'] ?? '');
         $_SESSION['is_admin'] = true;
         $_SESSION['logged_in'] = true;
-        redirect('admin-dashboard');
+        redirect('admin-analytics');
     }
 
     $error = 'Invalid admin email/mobile number or password.';
