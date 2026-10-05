@@ -5,36 +5,48 @@ if (empty($_SESSION['is_admin'])) {
     redirect('admin-login');
 }
 
-// Fetch stats
-$totalVisits = $pdo->query('SELECT COUNT(*) FROM page_views')->fetchColumn();
-$uniqueVisitors = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views')->fetchColumn();
+try {
+    // Fetch stats
+    $totalVisits = $pdo->query('SELECT COUNT(*) FROM page_views')->fetchColumn();
+    $uniqueVisitors = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views')->fetchColumn();
 
-// Today's stats
-$todayVisits = $pdo->query('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
-$todayUnique = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
+    // Today's stats
+    $todayVisits = $pdo->query('SELECT COUNT(*) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
+    $todayUnique = $pdo->query('SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE DATE(created_at) = CURDATE()')->fetchColumn();
 
-// Top pages
-$topPages = $pdo->query('
-    SELECT page_url, COUNT(*) as views 
-    FROM page_views 
-    GROUP BY page_url 
-    ORDER BY views DESC 
-    LIMIT 10
-')->fetchAll();
+    // Top pages
+    $topPages = $pdo->query('
+        SELECT page_url, COUNT(*) as views 
+        FROM page_views 
+        GROUP BY page_url 
+        ORDER BY views DESC 
+        LIMIT 10
+    ')->fetchAll();
 
-// Recent visitors
-$recentVisitors = $pdo->query('
-    SELECT page_url, ip_address, created_at 
-    FROM page_views 
-    ORDER BY created_at DESC 
-    LIMIT 15
-')->fetchAll();
+    // Recent visitors
+    $recentVisitors = $pdo->query('
+        SELECT page_url, ip_address, created_at 
+        FROM page_views 
+        ORDER BY created_at DESC 
+        LIMIT 15
+    ')->fetchAll();
+} catch (PDOException $e) {
+    $totalVisits = $uniqueVisitors = $todayVisits = $todayUnique = 0;
+    $topPages = $recentVisitors = [];
+    $error = "Analytics table missing! Please run yourdomain.com/sync_online_db.php to install the tracker.";
+}
 ?>
 
 <section>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Visitor Analytics Dashboard</h2>
     </div>
+
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-warning shadow-sm border-0 fw-medium">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
 
     <!-- Quick Stats -->
     <div class="row g-4 mb-5">
