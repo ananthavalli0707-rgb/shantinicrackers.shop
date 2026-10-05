@@ -9,6 +9,7 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $name = trim($_POST['name'] ?? '');
+    $tamilName = trim($_POST['tamil_name'] ?? '');
     $discountPercent = (float)($_POST['discount_percent'] ?? 0);
     
     $imagePath = null;
@@ -32,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$error && $name !== '') {
-        $stmt = $pdo->prepare('INSERT INTO categories (name, image_url, discount_percent) VALUES (:name, :image_url, :discount_percent)');
-        $stmt->execute(['name' => $name, 'image_url' => $imagePath, 'discount_percent' => $discountPercent]);
+        $stmt = $pdo->prepare('INSERT INTO categories (name, tamil_name, image_url, discount_percent) VALUES (:name, :tamil_name, :image_url, :discount_percent)');
+        $stmt->execute(['name' => $name, 'tamil_name' => $tamilName ?: null, 'image_url' => $imagePath, 'discount_percent' => $discountPercent]);
         redirect('admin-categories');
     }
     if (!$error && $name === '') $error = 'Category name is required.';
@@ -49,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label class="form-label">Category Name</label>
                 <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tamil Name (Optional)</label>
+                <input type="text" name="tamil_name" class="form-control">
             </div>
             <div class="mb-3">
                 <label class="form-label">Category Image (Optional)</label>

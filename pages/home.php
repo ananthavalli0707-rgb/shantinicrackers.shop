@@ -61,6 +61,48 @@ try {
 </section>
 <?php endif; ?>
 
+<!-- Combo Special Pack for Diwali -->
+<section class="section-padding bg-surface border-bottom" style="background-color: var(--bs-warning-bg-subtle) !important;">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-kicker text-danger fw-bold">Exclusive Offer</span>
+            <h2 class="h2-section">Combo Special Pack for Diwali 🪔</h2>
+        </div>
+        <div class="row justify-content-center g-4 mt-2">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <img src="<?= asset('uploads/3000.jpeg') ?>" class="card-img-top w-100" alt="3000 Wala Special Pack" style="height: 350px; object-fit: contain; background: #fff; padding: 1rem;">
+                    <div class="card-body text-center bg-white">
+                        <h4 class="fw-bold mb-0">₹3000 Special Pack</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden position-relative">
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-danger fs-6 shadow">Best Value</span>
+                    </div>
+                    <img src="<?= asset('uploads/4000.jpeg') ?>" class="card-img-top w-100" alt="4000 Wala Special Pack" style="height: 350px; object-fit: contain; background: #fff; padding: 1rem;">
+                    <div class="card-body text-center bg-white">
+                        <h4 class="fw-bold mb-0">₹4000 Special Pack</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <img src="<?= asset('uploads/5000.jpeg') ?>" class="card-img-top w-100" alt="5000 Wala Special Pack" style="height: 350px; object-fit: contain; background: #fff; padding: 1rem;">
+                    <div class="card-body text-center bg-white">
+                        <h4 class="fw-bold mb-0">₹5000 Special Pack</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <a href="<?= url('products') ?>" class="btn-primary btn-lg shadow">Shop Combo Packs Now</a>
+        </div>
+    </div>
+</section>
+
 <!-- New Arrivals Section -->
 <?php
 $newArrivals = $pdo->query("SELECT products.*, products.image_url AS image, categories.name AS category_name FROM products JOIN categories ON categories.id = products.category_id WHERE categories.name = 'New Arrivals' ORDER BY products.id DESC")->fetchAll();
@@ -79,7 +121,7 @@ if ($newArrivals):
                         <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
                             <div class="catalog-image-wrap">
                                 <?php if (!empty($product['image'])): ?>
-                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?>">
                                 <?php else: ?>
                                     <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
                                 <?php endif; ?>
@@ -88,7 +130,7 @@ if ($newArrivals):
                         <div class="card-body-content">
                             <span class="card-category"><?= htmlspecialchars($product['category_name']) ?></span>
                             <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
-                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h3>
                             </a>
                             <div class="card-price-wrap mt-auto">
                                 <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>
@@ -134,7 +176,7 @@ if ($childCrackers):
                         <a href="<?= url('product-detail', ['id' => $product['id']]) ?>">
                             <div class="catalog-image-wrap">
                                 <?php if (!empty($product['image'])): ?>
-                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?>">
                                 <?php else: ?>
                                     <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
                                 <?php endif; ?>
@@ -143,7 +185,7 @@ if ($childCrackers):
                         <div class="card-body-content">
                             <span class="card-category"><?= htmlspecialchars($product['category_name']) ?></span>
                             <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
-                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h3>
                             </a>
                             <div class="card-price-wrap mt-auto">
                                 <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>
@@ -256,7 +298,7 @@ if ($childCrackers):
                                     <img src="<?= asset('uploads/offer%20logo.png') ?>" alt="Offer" class="offer-logo-img">
                                 <?php endif; ?>
                                 <?php if (!empty($product['image'])): ?>
-                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                    <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?>">
                                 <?php else: ?>
                                     <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
                                 <?php endif; ?>
@@ -265,7 +307,7 @@ if ($childCrackers):
                         <div class="card-body-content">
                             <span class="card-category"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></span>
                             <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
-                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                                <h3 class="card-product-title"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h3>
                             </a>
                             <div class="card-price-wrap mt-auto">
                                 <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>

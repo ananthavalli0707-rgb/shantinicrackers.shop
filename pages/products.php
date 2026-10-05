@@ -85,7 +85,7 @@ $totalCategories = count($productGroups);
                                                         <img src="<?= asset('uploads/offer%20logo.png') ?>" alt="Offer" class="offer-logo-img">
                                                     <?php endif; ?>
                                                     <?php if (!empty($product['image'])): ?>
-                                                        <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                                        <img src="<?= asset('uploads/' . $product['image']) ?>" alt="<?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?>">
                                                     <?php else: ?>
                                                         <div class="text-secondary font-monospace" style="font-size: 3rem;">🧨</div>
                                                     <?php endif; ?>
@@ -94,7 +94,7 @@ $totalCategories = count($productGroups);
                                             <div class="card-body-content">
                                                 <span class="card-category"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></span>
                                                 <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" class="text-decoration-none">
-                                                    <h3 class="card-product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                                                    <h3 class="card-product-title"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h3>
                                                 </a>
                                                 <div class="card-price-wrap mt-auto">
                                                     <span class="price-current">₹<?= htmlspecialchars($product['discount_price']) ?></span>

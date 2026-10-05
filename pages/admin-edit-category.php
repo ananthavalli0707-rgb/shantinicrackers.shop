@@ -18,6 +18,7 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $name = trim($_POST['name'] ?? '');
+    $tamilName = trim($_POST['tamil_name'] ?? '');
     $discountPercent = (float)($_POST['discount_percent'] ?? 0);
     
     $imagePath = $category['image_url'];
@@ -44,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$error && $name !== '') {
-        $stmt = $pdo->prepare('UPDATE categories SET name = :name, image_url = :image_url, discount_percent = :discount_percent WHERE id = :id');
-        $stmt->execute(['name' => $name, 'image_url' => $imagePath, 'discount_percent' => $discountPercent, 'id' => $id]);
+        $stmt = $pdo->prepare('UPDATE categories SET name = :name, tamil_name = :tamil_name, image_url = :image_url, discount_percent = :discount_percent WHERE id = :id');
+        $stmt->execute(['name' => $name, 'tamil_name' => $tamilName ?: null, 'image_url' => $imagePath, 'discount_percent' => $discountPercent, 'id' => $id]);
         
         // Update all products in this category with the new discount percentage
         $updateProducts = $pdo->prepare('UPDATE products SET discount_price = ROUND(actual_price * (1 - :discount_percent / 100), 2) WHERE category_id = :category_id');
@@ -66,6 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label class="form-label">Category Name</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($category['name']) ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tamil Name (Optional)</label>
+                <input type="text" name="tamil_name" class="form-control" value="<?= htmlspecialchars($category['tamil_name'] ?? '') ?>">
             </div>
             <div class="mb-3">
                 <label class="form-label">Category Image (Optional)</label>

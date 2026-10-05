@@ -55,6 +55,9 @@ switch ($page) {
     case 'admin-edit-product':
         include __DIR__ . '/pages/admin-edit-product.php';
         break;
+    case 'admin-reports':
+        include __DIR__ . '/pages/admin-reports.php';
+        break;
     case 'admin-inquiries':
         include __DIR__ . '/pages/admin-inquiries.php';
         break;

@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
     } else {
         $dbItems = [];
         foreach ($_SESSION['cart'] as $productId => $quantity) {
-            $stmt = $pdo->prepare('SELECT id, name, actual_price, discount_price FROM products WHERE id = :id');
+            $stmt = $pdo->prepare('SELECT id, name, tamil_name, actual_price, discount_price FROM products WHERE id = :id');
             $stmt->execute(['id' => (int)$productId]);
             $product = $stmt->fetch();
             if ($product && (int)$quantity > 0) {
@@ -117,7 +117,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 $text .= "வாட்ஸ்அப் (WhatsApp): {$whatsappPhone}\n\n";
                 $text .= "Products:\n";
                 foreach ($dbItems as $item) {
-                    $text .= "- {$item['name']} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
+                    $fullName = $item['name'];
+                    if (!empty($item['tamil_name'])) {
+                        $fullName .= ' (' . $item['tamil_name'] . ')';
+                    }
+                    $text .= "- {$fullName} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
                 }
                 $text .= "\nமொத்தத் தொகை (Estimated Amount): Rs. " . number_format($amount, 2);
 
@@ -221,7 +225,7 @@ $amount = round($discountedTotal, 2);
                                                         <div class="rounded d-flex align-items-center justify-content-center bg-light text-secondary" style="width: 60px; height: 60px; font-size: 1.5rem;">🧨</div>
                                                     <?php endif; ?>
                                                     <div>
-                                                        <h6 class="mb-0 fw-bold" style="font-family: var(--font-heading);"><?= htmlspecialchars($product['name']) ?></h6>
+                                                        <h6 class="mb-0 fw-bold" style="font-family: var(--font-heading);"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h6>
                                                     </div>
                                                 </div>
                                             </td>
@@ -325,7 +329,7 @@ $amount = round($discountedTotal, 2);
                             <div class="form-check mb-4 bg-light p-3 rounded border text-start">
                                 <input class="form-check-input ms-0 me-2 mt-1 border-primary" type="checkbox" value="1" id="refundTermsCheck" required style="width: 1.2rem; height: 1.2rem;">
                                 <label class="form-check-label text-muted small lh-base d-block" for="refundTermsCheck" style="margin-left: 1.8rem; cursor: pointer;">
-                                    <span class="text-dark fw-bold">I agree to the Terms & Conditions, Shipping Policy, and Refund & Cancellation Policy.</span><br>
+                                    <span class="text-dark fw-bold">I agree to the Terms & Conditions, Shipping Policy, and Refund Policy.</span><br>
                                     (நான் விதிமுறைகள் மற்றும் பணம் திரும்பப் பெறாமைக்கான கொள்கைகளை ஒப்புக்கொள்கிறேன்).
                                 </label>
                             </div>

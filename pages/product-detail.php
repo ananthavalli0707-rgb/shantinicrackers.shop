@@ -19,7 +19,7 @@ endif;
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="<?= url('home') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= url('products') ?>">Products</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($product['name']) ?></li>
+                <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></li>
             </ol>
         </nav>
 
@@ -30,7 +30,7 @@ endif;
                         <span class="offer-badge" style="top: 1rem; right: 1rem;">Offer</span>
                     <?php endif; ?>
                     <?php if (!empty($product['image'])): ?>
-                        <img src="<?= asset('uploads/' . $product['image']) ?>" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;" alt="<?= htmlspecialchars($product['name']) ?>">
+                        <img src="<?= asset('uploads/' . $product['image']) ?>" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;" alt="<?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?>">
                     <?php else: ?>
                         <div class="text-secondary text-center bg-light rounded d-flex align-items-center justify-content-center" style="font-size: 6rem; width: 100%; aspect-ratio: 1;">🧨</div>
                     <?php endif; ?>
@@ -38,7 +38,7 @@ endif;
             </div>
             <div class="col-md-7">
                 <span class="card-category text-accent mb-2 d-block fw-bold"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></span>
-                <h1 class="h1-display mb-3" style="font-size: clamp(2rem, 3vw, 2.5rem);"><?= htmlspecialchars($product['name']) ?></h1>
+                <h1 class="h1-display mb-3" style="font-size: clamp(2rem, 3vw, 2.5rem);"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h1>
                 
                 <div class="mb-4 pb-4 border-bottom">
                     <p class="text-muted fs-5 mb-0"><?= htmlspecialchars($product['description'] ?? 'Premium quality product for your celebrations.') ?></p>

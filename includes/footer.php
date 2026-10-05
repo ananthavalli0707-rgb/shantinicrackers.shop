@@ -54,7 +54,7 @@
                         <li><a href="<?= url('terms') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Terms of Use</a></li>
                         <li><a href="<?= url('privacy') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Privacy Policy</a></li>
                         <li><a href="<?= url('shipping') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Shipping & Delivery</a></li>
-                        <li><a href="<?= url('refund') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Refund & Cancellation</a></li>
+                        <li><a href="<?= url('refund') ?>" class="text-white-50 text-decoration-none hover-primary transition d-flex align-items-center gap-2"><i class="fa-solid fa-angle-right small text-primary"></i> Refund Policy</a></li>
                     </ul>
                 </div>
 

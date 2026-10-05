@@ -30,9 +30,10 @@ $inquiryCount = (int)$pdo->query('SELECT COUNT(*) FROM inquiries')->fetchColumn(
 
 <section>
     <h2 class="fw-bold mb-4">Admin Dashboard</h2>
-    <div class="d-flex gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-2 mb-4">
         <a href="<?= url('admin-add-product') ?>" class="btn btn-danger">Add Product</a>
         <a href="<?= url('admin-inquiries') ?>" class="btn btn-outline-dark">Enquiries (<?= $inquiryCount ?>)</a>
+        <a href="<?= url('admin-reports') ?>" class="btn btn-outline-primary">Tracking Report</a>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle admin-table">
