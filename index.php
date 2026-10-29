@@ -79,6 +79,9 @@ switch ($page) {
     case 'admin-inquiries':
         include __DIR__ . '/pages/admin-inquiries.php';
         break;
+    case 'admin-edit-inquiry':
+        include __DIR__ . '/pages/admin-edit-inquiry.php';
+        break;
     case 'admin-download-inquiry':
         include __DIR__ . '/pages/admin-download-inquiry.php';
         break;
@@ -99,6 +102,15 @@ switch ($page) {
         break;
     case 'admin-edit-carousel':
         include __DIR__ . '/pages/admin-edit-carousel.php';
+        break;
+    case 'admin-product-details':
+        include __DIR__ . '/pages/admin-product-details.php';
+        break;
+    case 'admin-add-product-detail':
+        include __DIR__ . '/pages/admin-add-product-detail.php';
+        break;
+    case 'admin-edit-product-detail':
+        include __DIR__ . '/pages/admin-edit-product-detail.php';
         break;
     case 'admin-logout':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

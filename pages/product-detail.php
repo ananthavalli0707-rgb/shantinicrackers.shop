@@ -37,7 +37,14 @@ endif;
                 </div>
             </div>
             <div class="col-md-7">
-                <span class="card-category text-accent mb-2 d-block fw-bold"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></span>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="card-category text-accent fw-bold"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></span>
+                    <?php if (empty($product['is_stock'])): ?>
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1"><i class="fa-solid fa-xmark me-1"></i>Out of Stock</span>
+                    <?php else: ?>
+                        <span class="badge bg-success-subtle text-success px-2 py-1"><i class="fa-solid fa-check me-1"></i>In Stock</span>
+                    <?php endif; ?>
+                </div>
                 <h1 class="h1-display mb-3" style="font-size: clamp(2rem, 3vw, 2.5rem);"><?= htmlspecialchars($product['name']) . (!empty($product['tamil_name']) ? ' (' . htmlspecialchars($product['tamil_name']) . ')' : '') ?></h1>
                 
                 <div class="mb-4 pb-4 border-bottom">
@@ -71,9 +78,15 @@ endif;
                             </div>
                         </div>
                         <div class="col-12 col-sm-auto mt-4 mt-sm-0 flex-grow-1">
-                            <button type="submit" class="btn-primary w-100 py-3 text-uppercase" style="letter-spacing: 0.5px;">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Add to Estimate
-                            </button>
+                            <?php if (empty($product['is_stock'])): ?>
+                                <button type="button" class="btn btn-secondary w-100 py-3 text-uppercase disabled" disabled style="letter-spacing: 0.5px;">
+                                    <i class="fa-solid fa-ban me-2"></i> Currently Out of Stock
+                                </button>
+                            <?php else: ?>
+                                <button type="submit" class="btn-primary w-100 py-3 text-uppercase" style="letter-spacing: 0.5px;">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Add to Estimate
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                     

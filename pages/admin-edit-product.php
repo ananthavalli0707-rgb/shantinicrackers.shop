@@ -35,8 +35,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if (!$error) {
-        $stmt = $pdo->prepare('UPDATE products SET name = :name, category_id = :category_id, brand_id = :brand_id, actual_price = :actual_price, discount_price = :discount_price, image_url = :image_url, is_stock = :is_stock WHERE id = :id');
-        $stmt->execute(['name' => trim($_POST['name'] ?? ''), 'category_id' => $categoryId, 'brand_id' => (int)($_POST['brand_id'] ?? 0) ?: null, 'actual_price' => $actualPrice, 'discount_price' => $discountPrice, 'image_url' => $imagePath, 'is_stock' => !empty($_POST['is_stock']) ? 1 : 0, 'id' => $productId]);
+        $stmt = $pdo->prepare('UPDATE products SET name = :name, tamil_name = :tamil_name, category_id = :category_id, brand_id = :brand_id, actual_price = :actual_price, discount_price = :discount_price, image_url = :image_url, is_stock = :is_stock, description = :description WHERE id = :id');
+        $stmt->execute([
+            'name' => trim($_POST['name'] ?? ''),
+            'tamil_name' => trim($_POST['tamil_name'] ?? '') ?: null,
+            'category_id' => $categoryId,
+            'brand_id' => (int)($_POST['brand_id'] ?? 0) ?: null,
+            'actual_price' => $actualPrice,
+            'discount_price' => $discountPrice,
+            'image_url' => $imagePath,
+            'is_stock' => !empty($_POST['is_stock']) ? 1 : 0,
+            'description' => trim($_POST['description'] ?? '') ?: null,
+            'id' => $productId
+        ]);
         redirect('admin-dashboard');
     }
 }
@@ -45,7 +56,12 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
 ?>
 
 <section>
-    <h2 class="fw-bold mb-4">Edit Product</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Edit Product</h2>
+        <a href="<?= url('admin-edit-product-detail', ['id' => $productId]) ?>" class="btn btn-outline-primary btn-sm">
+            <i class="fa-solid fa-file-pen me-1"></i> Switch to Detailed Product Editor
+        </a>
+    </div>
     <div class="card shadow-sm border-0 p-4">
         <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
         <form method="POST" enctype="multipart/form-data">
@@ -53,6 +69,10 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
             <div class="mb-3">
                 <label class="form-label">Product Name</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($product['name']) ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tamil Name (தமிழ் பெயர்)</label>
+                <input type="text" name="tamil_name" class="form-control" value="<?= htmlspecialchars($product['tamil_name'] ?? '') ?>" placeholder="எ.கா. 5&#34; மெகா டீலக்ஸ்">
             </div>
             <div class="mb-3">
                 <label class="form-label">Category</label>
@@ -65,6 +85,10 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
             <div class="mb-3">
                 <label class="form-label">Actual Price</label>
                 <input type="number" name="actual_price" class="form-control" value="<?= htmlspecialchars($product['actual_price']) ?>" step="0.01" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description (Specifications & Details)</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Enter product details, pack count, etc."><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Product Image</label>

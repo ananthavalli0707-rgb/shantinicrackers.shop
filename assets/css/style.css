@@ -615,3 +615,55 @@ a:hover {
     background-color: var(--bg-color);
     color: var(--text-main);
 }
+
+/* Glassmorphism Auth Utilities */
+.glass-card {
+    background: rgba(22, 22, 26, 0.92) !important;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.65) !important;
+}
+
+.custom-input {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+}
+
+.custom-input:focus {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    border-color: #D4A72C !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(212, 167, 44, 0.25) !important;
+}
+
+.custom-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+    opacity: 1;
+}
+
+.custom-input:-webkit-autofill,
+.custom-input:-webkit-autofill:hover, 
+.custom-input:-webkit-autofill:focus, 
+.custom-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
+    box-shadow: 0 0 0 1000px #212529 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.custom-checkbox .form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.custom-checkbox .form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}

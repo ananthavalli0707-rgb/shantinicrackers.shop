@@ -211,7 +211,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= url('admin-inquiries') ?>" class="nav-link fw-medium <?= str_starts_with($currentPage, 'admin-inquiries') ? 'active bg-primary text-white shadow-sm' : 'text-main' ?>">
+                            <a href="<?= url('admin-inquiries') ?>" class="nav-link fw-medium <?= (str_starts_with($currentPage, 'admin-inquiries') || str_starts_with($currentPage, 'admin-edit-inquiry')) ? 'active bg-primary text-white shadow-sm' : 'text-main' ?>">
                                 <i class="fa-solid fa-envelope me-2"></i> Enquiries
                             </a>
                         </li>

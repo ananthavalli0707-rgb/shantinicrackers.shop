@@ -9,9 +9,11 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $name = trim($_POST['name'] ?? '');
+    $tamilName = trim($_POST['tamil_name'] ?? '') ?: null;
     $categoryId = (int)($_POST['category_id'] ?? 0);
     $brandId = (int)($_POST['brand_id'] ?? 0);
     $actualPrice = (float)($_POST['actual_price'] ?? 0);
+    $description = trim($_POST['description'] ?? '') ?: null;
     $categoryStmt = $pdo->prepare('SELECT discount_percent FROM categories WHERE id = :id');
     $categoryStmt->execute(['id' => $categoryId]);
     $category = $categoryStmt->fetch();
@@ -37,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if (!$error && $name !== '' && $categoryId > 0 && $actualPrice > 0) {
-        $stmt = $pdo->prepare('INSERT INTO products (name, category_id, brand_id, actual_price, discount_price, image_url, is_stock) VALUES (:name, :category_id, :brand_id, :actual_price, :discount_price, :image_url, 1)');
-        $stmt->execute(['name' => $name, 'category_id' => $categoryId, 'brand_id' => $brandId ?: null, 'actual_price' => $actualPrice, 'discount_price' => $discountPrice, 'image_url' => $imagePath]);
+        $stmt = $pdo->prepare('INSERT INTO products (name, tamil_name, category_id, brand_id, actual_price, discount_price, image_url, is_stock, description) VALUES (:name, :tamil_name, :category_id, :brand_id, :actual_price, :discount_price, :image_url, 1, :description)');
+        $stmt->execute(['name' => $name, 'tamil_name' => $tamilName, 'category_id' => $categoryId, 'brand_id' => $brandId ?: null, 'actual_price' => $actualPrice, 'discount_price' => $discountPrice, 'image_url' => $imagePath, 'description' => $description]);
         redirect('admin-dashboard');
     }
     if (!$error) $error = 'Product name, category, and a valid price are required.';
@@ -48,7 +50,12 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
 ?>
 
 <section>
-    <h2 class="fw-bold mb-4">Add New Product</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Add New Product</h2>
+        <a href="<?= url('admin-add-product-detail') ?>" class="btn btn-outline-danger btn-sm">
+            <i class="fa-solid fa-file-pen me-1"></i> Switch to Detailed Product Creator
+        </a>
+    </div>
     <div class="card shadow-sm border-0 p-4">
         <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
         <form method="POST" enctype="multipart/form-data">
@@ -56,6 +63,10 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
             <div class="mb-3">
                 <label class="form-label">Product Name</label>
                 <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tamil Name (தமிழ் பெயர்)</label>
+                <input type="text" name="tamil_name" class="form-control" placeholder="எ.கா. 5&#34; மெகா டீலக்ஸ்">
             </div>
             <div class="mb-3">
                 <label class="form-label">Category</label>
@@ -68,6 +79,10 @@ $brands = $pdo->query('SELECT id, name FROM brands ORDER BY name')->fetchAll();
             <div class="mb-3">
                 <label class="form-label">Actual Price</label>
                 <input type="number" name="actual_price" class="form-control" min="0" step="0.01" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description (Optional)</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Enter product specifications or details..."></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Product Image</label>
