@@ -138,9 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="text-muted small mb-0">Editing details for: <strong><?= htmlspecialchars($product['name']) ?></strong></p>
         </div>
         <div class="d-flex gap-2">
-            <a href="<?= url('product-detail', ['id' => $product['id']]) ?>" target="_blank" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
-                <i class="fa-solid fa-external-link"></i> View on Storefront
-            </a>
             <a href="<?= url('admin-product-details') ?>" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </div>

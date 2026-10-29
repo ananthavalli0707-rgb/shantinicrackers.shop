@@ -4,7 +4,7 @@
     <?php endif; ?>
     </main>
 
-    <?php if (empty($isStandalonePage)): ?>
+    <?php if (empty($isStandalonePage) && !$isAdminArea): ?>
     <footer class="site-footer bg-dark text-white mt-5 pt-5 pb-4 position-relative overflow-hidden" style="border-top: 4px solid var(--bs-primary);">
         <!-- Decorative background element -->
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(var(--bs-primary-rgb), 0.1), transparent 50%); pointer-events: none;"></div>
@@ -95,6 +95,7 @@
     </footer>
     <?php endif; ?>
 
+    <?php if (empty($isStandalonePage) && !$isAdminArea): ?>
     <!-- Cookie Consent Banner -->
     <div id="cookieConsentBanner" class="cookie-consent-banner">
         <div class="container">
@@ -113,8 +114,6 @@
     <button type="button" class="back-to-top-btn" id="backToTopBtn" aria-label="Back to top">
         <i class="fa-solid fa-arrow-up"></i> Back to Top
     </button>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const backToTopBtn = document.getElementById('backToTopBtn');
         if (backToTopBtn) {
@@ -130,6 +129,9 @@
             });
         }
     </script>
+    <?php endif; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function() {
             const body = document.body;
@@ -202,6 +204,7 @@
     });
     </script>
     
+    <?php if (empty($isStandalonePage) && !$isAdminArea): ?>
     <!-- Google Analytics Consent & Integration -->
     <script>
         (function() {
@@ -247,5 +250,6 @@
             }
         })();
     </script>
+    <?php endif; ?>
 </body>
 </html>

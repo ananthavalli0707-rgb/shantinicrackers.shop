@@ -61,7 +61,7 @@ function url($page, $params = []) {
     return $baseDir . '/' . urlencode($page) . ($query ? '?' . $query : '');
 }
 
-$currentPage = $_GET['page'] ?? 'home';
+$currentPage = $currentPage ?? ($_GET['page'] ?? 'home');
 $isAdminArea = str_starts_with($currentPage, 'admin-');
 $menuCategories = [];
 if (!$isAdminArea) {
@@ -121,11 +121,18 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
     <?php if (empty($isStandalonePage)): ?>
     <nav class="navbar navbar-dark navbar-expand-lg site-nav">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold order-1 order-lg-1" href="<?= url('home') ?>">
-                <img src="<?= asset('img/shantini_logo.png') ?>" alt="Shantini Crackers Logo" style="height: 40px; width: auto; border-radius: 8px;">
-                <span class="d-none d-sm-inline">Shantini Crackers</span>
-            </a>
+        <div class="container<?= $isAdminArea ? '-fluid px-4' : '' ?>">
+            <?php if ($isAdminArea): ?>
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold order-1 order-lg-1" href="<?= url('admin-analytics') ?>">
+                    <img src="<?= asset('img/shantini_logo.png') ?>" alt="Shantini Crackers Logo" style="height: 40px; width: auto; border-radius: 8px;">
+                    <span class="d-none d-sm-inline">Shantini Crackers Admin</span>
+                </a>
+            <?php else: ?>
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold order-1 order-lg-1" href="<?= url('home') ?>">
+                    <img src="<?= asset('img/shantini_logo.png') ?>" alt="Shantini Crackers Logo" style="height: 40px; width: auto; border-radius: 8px;">
+                    <span class="d-none d-sm-inline">Shantini Crackers</span>
+                </a>
+            <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto ms-lg-0 order-lg-2">
                 <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle theme">
                     <span class="theme-icon" aria-hidden="true">🌙</span>
@@ -144,13 +151,15 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     <?php endif; ?>
                     <?php if (!empty($_SESSION['logged_in'])): ?>
                         <span class="nav-link nav-user">Hi, <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></span>
-                        <?php if (!empty($_SESSION['is_admin'])): ?>
+                        <?php if (!empty($_SESSION['is_admin']) && !$isAdminArea): ?>
                             <a class="nav-link" href="<?= url('admin-analytics') ?>">Admin Analytics</a>
                         <?php endif; ?>
                         <?php $logoutRoute = !empty($_SESSION['is_admin']) ? 'admin-logout' : 'logout'; ?>
                         <form method="POST" action="<?= url($logoutRoute) ?>" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><button type="submit" class="nav-link btn btn-link p-0 border-0">Logout</button></form>
                     <?php else: ?>
-                        <a class="nav-link" href="<?= url('login') ?>">Login</a>
+                        <?php if (!$isAdminArea): ?>
+                            <a class="nav-link" href="<?= url('login') ?>">Login</a>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>

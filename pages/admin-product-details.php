@@ -363,9 +363,6 @@ function build_filter_url($newPage = 1) {
                             </td>
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-1">
-                                    <a href="<?= url('product-detail', ['id' => $p['id']]) ?>" target="_blank" class="btn btn-sm btn-outline-secondary" title="View in Store">
-                                        <i class="fa-solid fa-external-link"></i>
-                                    </a>
                                     <a href="<?= url('admin-edit-product-detail', ['id' => $p['id']]) ?>" class="btn btn-sm btn-primary" title="Edit Product Details">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit
                                     </a>

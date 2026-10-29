@@ -98,10 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <button type="submit" class="btn btn-light btn-lg w-100 fw-bold shadow-lg" style="border-radius: 12px; letter-spacing: 0.5px;">Authenticate</button>
             </form>
-            
-            <div class="text-center mt-4 pt-3 border-top border-secondary">
-                 <a href="<?= url('login') ?>" class="text-white-50 small text-decoration-none"><i class="fa-solid fa-arrow-left me-1"></i> Return to Customer Login</a>
-            </div>
         </div>
     </div>
 </div>
