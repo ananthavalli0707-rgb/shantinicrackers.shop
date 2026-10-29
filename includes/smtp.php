@@ -1,6 +1,6 @@
 <?php
 
-function send_smtp_email(string $toEmail, string $subject, string $body, bool $isHtml = true): array {
+function send_smtp_email($toEmail, string $subject, string $body, bool $isHtml = true, array $attachments = []): array {
     $config = require __DIR__ . '/../config/smtp.php';
 
     $host = $config['host'] ?? '';
@@ -17,6 +17,15 @@ function send_smtp_email(string $toEmail, string $subject, string $body, bool $i
             'success' => false,
             'smtp_configured' => false,
             'message' => 'SMTP credentials are not configured in config/smtp.php or environment variables.'
+        ];
+    }
+
+    $recipients = is_array($toEmail) ? array_values(array_filter(array_map('trim', $toEmail))) : [trim((string)$toEmail)];
+    if (empty($recipients)) {
+        return [
+            'success' => false,
+            'smtp_configured' => true,
+            'message' => 'No recipients specified.'
         ];
     }
 
@@ -113,9 +122,16 @@ function send_smtp_email(string $toEmail, string $subject, string $body, bool $i
             throw new Exception("MAIL FROM failed: {$mailFrom}");
         }
 
-        $rcptTo = $sendCommand("RCPT TO:<{$toEmail}>");
-        if (substr($rcptTo, 0, 3) !== '250') {
-            throw new Exception("RCPT TO failed: {$rcptTo}");
+        $acceptedRecipients = [];
+        foreach ($recipients as $recipient) {
+            $rcptResp = $sendCommand("RCPT TO:<{$recipient}>");
+            if (substr($rcptResp, 0, 3) === '250') {
+                $acceptedRecipients[] = $recipient;
+            }
+        }
+
+        if (empty($acceptedRecipients)) {
+            throw new Exception("All recipient addresses were rejected by the SMTP server.");
         }
 
         $dataResp = $sendCommand("DATA");
@@ -123,18 +139,52 @@ function send_smtp_email(string $toEmail, string $subject, string $body, bool $i
             throw new Exception("DATA command failed: {$dataResp}");
         }
 
-        $contentType = $isHtml ? 'text/html; charset=UTF-8' : 'text/plain; charset=UTF-8';
-        $headers = [
-            "From: =?UTF-8?B?" . base64_encode($fromName) . "?= <{$fromEmail}>",
-            "To: <{$toEmail}>",
-            "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=",
-            "MIME-Version: 1.0",
-            "Content-Type: {$contentType}",
-            "Date: " . date('r'),
-            "X-Mailer: Shantini Crackers SMTP Mailer"
-        ];
+        $toHeader = implode(', ', array_map(fn($r) => "<{$r}>", $acceptedRecipients));
+        $textType = $isHtml ? 'text/html; charset=UTF-8' : 'text/plain; charset=UTF-8';
 
-        $emailData = implode("\r\n", $headers) . "\r\n\r\n" . $body . "\r\n.";
+        if (!empty($attachments)) {
+            $boundary = "==Multipart_Boundary_x" . md5(microtime(true) . mt_rand()) . "x";
+            $headers = [
+                "From: =?UTF-8?B?" . base64_encode($fromName) . "?= <{$fromEmail}>",
+                "To: {$toHeader}",
+                "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=",
+                "MIME-Version: 1.0",
+                "Content-Type: multipart/mixed; boundary=\"{$boundary}\"",
+                "Date: " . date('r'),
+                "X-Mailer: Shantini Crackers SMTP Mailer"
+            ];
+
+            $payload = "--{$boundary}\r\n";
+            $payload .= "Content-Type: {$textType}\r\n";
+            $payload .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+            $payload .= $body . "\r\n\r\n";
+
+            foreach ($attachments as $att) {
+                $attName = $att['name'] ?? 'attachment.pdf';
+                $attType = $att['type'] ?? 'application/pdf';
+                $attContent = $att['content'] ?? '';
+
+                $payload .= "--{$boundary}\r\n";
+                $payload .= "Content-Type: {$attType}; name=\"{$attName}\"\r\n";
+                $payload .= "Content-Transfer-Encoding: base64\r\n";
+                $payload .= "Content-Disposition: attachment; filename=\"{$attName}\"\r\n\r\n";
+                $payload .= chunk_split(base64_encode($attContent)) . "\r\n";
+            }
+            $payload .= "--{$boundary}--\r\n";
+            $emailData = implode("\r\n", $headers) . "\r\n\r\n" . $payload . "\r\n.";
+        } else {
+            $headers = [
+                "From: =?UTF-8?B?" . base64_encode($fromName) . "?= <{$fromEmail}>",
+                "To: {$toHeader}",
+                "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=",
+                "MIME-Version: 1.0",
+                "Content-Type: {$textType}",
+                "Date: " . date('r'),
+                "X-Mailer: Shantini Crackers SMTP Mailer"
+            ];
+            $emailData = implode("\r\n", $headers) . "\r\n\r\n" . $body . "\r\n.";
+        }
+
         $sendBody = $sendCommand($emailData);
 
         if (substr($sendBody, 0, 3) !== '250') {
@@ -160,3 +210,9 @@ function send_smtp_email(string $toEmail, string $subject, string $body, bool $i
         ];
     }
 }
+
+function get_admin_email(): string {
+    $config = require __DIR__ . '/../config/smtp.php';
+    return $config['admin_email'] ?? 'shantinicrackerssivakasi@gmail.com';
+}
+

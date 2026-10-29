@@ -10,5 +10,6 @@ return [
     'encryption' => getenv('SMTP_SECURE') ?: ($localConfig['encryption'] ?? 'tls'),
     'from_email' => getenv('SMTP_FROM_EMAIL') ?: ($localConfig['from_email'] ?? ''),
     'from_name' => getenv('SMTP_FROM_NAME') ?: ($localConfig['from_name'] ?? 'Shantini Crackers'),
+    'admin_email' => getenv('SMTP_ADMIN_EMAIL') ?: ($localConfig['admin_email'] ?? 'shantinicrackerssivakasi@gmail.com'),
     'timeout' => 15,
 ];

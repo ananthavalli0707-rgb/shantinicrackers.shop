@@ -108,30 +108,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
                 }
                 $pdo->commit();
 
-                $my_number = "919786361678";
-                
-                $text = "வணக்கம் Shantini Crackers! எனது எஸ்டிமேட் விபரம் இதோ:\n\n";
-                $text .= "Request #: {$inquiryId}\n";
-                $text .= "பெயர் (Name): {$shippingName}\n";
-                $text .= "முகவரி (Address): {$address1}, {$city}, {$state} - {$pincode}\n";
-                $text .= "வாட்ஸ்அப் (WhatsApp): {$whatsappPhone}\n\n";
-                $text .= "Products:\n";
-                foreach ($dbItems as $item) {
+                require_once __DIR__ . '/../includes/pdf.php';
+                $pdfData = generate_inquiry_pdf((int)$inquiryId, $pdo);
+                $attachments = [];
+                if ($pdfData && !empty($pdfData['content'])) {
+                    $attachments[] = [
+                        'name'    => $pdfData['filename'],
+                        'type'    => 'application/pdf',
+                        'content' => $pdfData['content']
+                    ];
+                }
+
+                $adminEmail = get_admin_email();
+                $recipients = [$email];
+                if (!empty($adminEmail) && !in_array($adminEmail, $recipients)) {
+                    $recipients[] = $adminEmail;
+                }
+
+                $emailSubject = "Shantini Crackers - Estimate Request #{$inquiryId} ({$shippingName})";
+                $emailBody = "Hello,\n\n" .
+                    "A new estimate inquiry #{$inquiryId} has been successfully recorded in Shantini Crackers.\n\n" .
+                    "--------------------------------------------------\n" .
+                    "ESTIMATE DETAILS:\n" .
+                    "Request ID      : #{$inquiryId}\n" .
+                    "Customer Name   : {$shippingName}\n" .
+                    "WhatsApp / Phone: {$whatsappPhone}\n" .
+                    "Customer Email  : {$email}\n" .
+                    "Delivery Address: {$address1}, {$city}, {$state} - {$pincode}\n" .
+                    "Total Items     : " . count($dbItems) . " product(s)\n" .
+                    "Estimated Total : Rs. " . number_format($amount, 2) . "\n" .
+                    "--------------------------------------------------\n\n" .
+                    "The complete itemized estimate PDF (with all products, quantities, and pricing) is attached to this email.\n\n" .
+                    "Our team will review your order and get in touch with you shortly to confirm transport and payment.\n\n" .
+                    "Thank you for choosing Shantini Crackers!\n" .
+                    "Phone: 9786361678 / WhatsApp: 7708971956\n" .
+                    "Email: shantinicrackerssivakasi@gmail.com";
+
+                $mailResult = send_smtp_email($recipients, $emailSubject, $emailBody, false, $attachments);
+
+                $waConfig = file_exists(__DIR__ . '/../config/whatsapp.php') ? require __DIR__ . '/../config/whatsapp.php' : [];
+                $my_number = $waConfig['admin_phone'] ?? '919786361678';
+
+                $waText = "வணக்கம் Shantini Crackers! எனது எஸ்டிமேட் விபரம் இதோ:\n\n";
+                $waText .= "Request #: {$inquiryId}\n";
+                $waText .= "பெயர் (Name): {$shippingName}\n";
+                $waText .= "முகவரி (Address): {$address1}, {$city}, {$state} - {$pincode}\n";
+                $waText .= "வாட்ஸ்அப் (WhatsApp): {$whatsappPhone}\n\n";
+                $waText .= "Products:\n";
+                $previewItems = array_slice($dbItems, 0, 8);
+                foreach ($previewItems as $item) {
                     $fullName = $item['name'];
                     if (!empty($item['tamil_name'])) {
                         $fullName .= ' (' . $item['tamil_name'] . ')';
                     }
-                    $text .= "- {$fullName} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
+                    $waText .= "- {$fullName} x {$item['quantity']} = Rs. " . number_format($item['subtotal'], 2) . "\n";
                 }
-                $text .= "\nமொத்தத் தொகை (Estimated Amount): Rs. " . number_format($amount, 2);
+                if (count($dbItems) > 8) {
+                    $waText .= "... +" . (count($dbItems) - 8) . " more items (Details attached in Email/PDF)\n";
+                }
+                $waText .= "\nமொத்தத் தொகை (Estimated Amount): Rs. " . number_format($amount, 2);
 
-                $mailResult = send_smtp_email($email, "Shantini Crackers Estimate Request #{$inquiryId}", $text, false);
-                $emailSent = $mailResult['success'];
+                $whatsapp_url = "https://wa.me/" . $my_number . "?text=" . rawurlencode($waText);
 
                 $_SESSION['cart'] = [];
-                $_SESSION['inquiry_success'] = 'Request #' . (int)$inquiryId . ' was saved. WhatsApp will open on your device with this message addressed to the admin. Press Send to notify the admin.';
-                
-                $whatsapp_url = "https://api.whatsapp.com/send?phone=" . $my_number . "&text=" . rawurlencode($text);
+                $_SESSION['inquiry_success'] = [
+                    'id'           => $inquiryId,
+                    'amount'       => $amount,
+                    'name'         => $shippingName,
+                    'email'        => $email,
+                    'whatsapp_url' => $whatsapp_url,
+                ];
+
                 header('Location: ' . $whatsapp_url);
                 exit;
             } catch (PDOException $exception) {
@@ -176,14 +223,36 @@ $amount = round($discountedTotal, 2);
             <?php endif; ?>
         </div>
 
-        <?php if ($submitSuccess !== ''): ?>
-            <div class="card shadow-sm mb-4 mx-auto border-success" style="max-width: 600px;">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0 fw-bold">🎆 Shantini Crackers - Order Confirmed</h5>
+        <?php if (!empty($submitSuccess)): ?>
+            <?php
+                $successId = is_array($submitSuccess) ? ($submitSuccess['id'] ?? '') : '';
+                $successEmail = is_array($submitSuccess) ? ($submitSuccess['email'] ?? '') : '';
+                $waUrl = is_array($submitSuccess) ? ($submitSuccess['whatsapp_url'] ?? '') : '';
+            ?>
+            <div class="card shadow-sm mb-5 mx-auto border-success overflow-hidden" style="max-width: 650px;">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-circle-check me-2"></i> Estimate #<?= htmlspecialchars((string)$successId) ?> Received Successfully!</h5>
                 </div>
-                <div class="card-body">
-                    <p class="mb-0 fs-5"><?= htmlspecialchars($submitSuccess) ?></p>
-                    <?php if (!empty($_SESSION['is_admin'])): ?><p class="mt-3 mb-0"><a href="<?= url('admin-inquiries') ?>" class="btn btn-sm btn-outline-success">Open Customer Inquiries</a></p><?php endif; ?>
+                <div class="card-body p-4 text-center">
+                    <p class="fs-5 mb-2 fw-semibold">Thank you! Your estimate inquiry has been recorded.</p>
+                    <p class="text-muted small mb-4">A complete itemized estimate PDF has been prepared and sent to your email (<strong><?= htmlspecialchars($successEmail) ?></strong>) and our admin.</p>
+                    
+                    <?php if (!empty($waUrl)): ?>
+                        <div class="p-3 bg-light rounded border mb-3">
+                            <p class="small text-muted mb-2 fw-bold">Connect with our admin team on WhatsApp:</p>
+                            <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
+                                <i class="fa-brands fa-whatsapp me-2 fs-5 align-middle"></i> Open WhatsApp Chat
+                            </a>
+                            <p class="text-muted mt-2 mb-0" style="font-size: 0.8rem;">(Please remember to press <strong>Send</strong> inside WhatsApp when it opens)</p>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="d-flex justify-content-center gap-2 mt-4 pt-2 border-top">
+                        <a href="<?= url('products') ?>" class="btn btn-outline-primary btn-sm px-4">Browse More Products</a>
+                        <?php if (!empty($_SESSION['is_admin'])): ?>
+                            <a href="<?= url('admin-inquiries') ?>" class="btn btn-sm btn-outline-success px-4">Open Admin Inquiries</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
